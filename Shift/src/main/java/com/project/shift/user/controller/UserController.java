@@ -1,9 +1,9 @@
 package com.project.shift.user.controller;
 
-import com.project.shift.user.dto.UserDTO;
 import com.project.shift.shop.dto.PointHistoryResponseDTO;
 import com.project.shift.shop.service.IOrderService;
 import com.project.shift.user.dto.LoginIdRequestDTO;
+import com.project.shift.user.dto.UserDTO;
 import com.project.shift.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,9 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
-import static com.project.shift.global.security.CurrentUser.getUserIdOrNull;
-
 import java.util.Map;
+
+import static com.project.shift.global.security.CurrentUser.getUserIdOrNull;
 
 @RestController
 @RequestMapping("/users")
@@ -119,5 +119,18 @@ public class UserController {
             throw new AccessDeniedException("본인 계정만 조회 가능합니다.");
 
         return ResponseEntity.ok(orderService.getPointHistory(userId));
+    }
+
+    // 마이포인트 조회
+    @GetMapping("/points")
+    public ResponseEntity<?> getMyPoints() {
+        try {
+            UserDTO user = userService.getUserInfo();
+            return ResponseEntity.ok(Map.of(
+                    "points", user.getPoints()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

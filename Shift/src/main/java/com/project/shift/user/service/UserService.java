@@ -118,6 +118,7 @@ public class UserService {
                 .name(userDTO.getName())
                 .phone(userDTO.getPhone())
                 .address(userDTO.getAddress())
+                .points(0)
                 .adminFlag("N")
                 .build();
     }
