@@ -4,26 +4,29 @@ import static com.project.shift.global.security.CurrentUser.getUserIdOrNull;
 
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
+import java.util.AbstractMap;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.AbstractMap;
-import java.util.Set;                  
-import java.util.stream.Stream;
-
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.project.shift.chat.dto.ChatroomUserDTO;
+import com.project.shift.chat.dto.DeletedChatroomUserInfoDTO;
 import com.project.shift.chat.dto.MessageDTO;
-import com.project.shift.chat.entity.ChatroomEntity;
-import com.project.shift.chat.repository.ChatroomRepository;
+import com.project.shift.chat.dto.MessageWithSenderDTO;
+import com.project.shift.chat.service.ChatroomService;
+import com.project.shift.chat.service.ChatroomUserService;
 import com.project.shift.chat.service.MessageService;
 import com.project.shift.product.dao.IPointDAO;
 import com.project.shift.product.entity.PointTransaction;
@@ -58,8 +61,10 @@ import com.project.shift.user.entity.UserEntity;
 import com.project.shift.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor // 생성자 주입을 임의의 코드없이 자동으로 설정해주는 어노테이션
 public class OrderService implements IOrderService {
 
@@ -71,6 +76,8 @@ public class OrderService implements IOrderService {
     private final UserRepository userRepository;
     private final MessageService messageService;
     private final PointTransactionRepository pointTransactionRepository;
+    private final ChatroomUserService chatroomUserService;
+    private final ChatroomService chatroomService;
 
     private String toDisplayOrderStatus(String code) {
         if (code == null) return "PENDING";
@@ -281,28 +288,74 @@ public class OrderService implements IOrderService {
     
     //############### 선물 구매 및 메시지 전송 ###############
     @Override
-    public PaymentResponseDTO requestGiftPayment(PaymentRequestDTO requestDTO, long chatroomId, long userId) {
-        PaymentResponseDTO dto = requestPayment(requestDTO);
-
-        String content = setGiftMessage(requestDTO);
-
+    public PaymentResponseDTO requestGiftPayment(PaymentRequestDTO requestDTO) {
+    	// userId 추출
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = Long.parseLong(auth.getName());
+        // receiverId 추출
+        Long receiverId = requestDTO.getReceiverId();
+        
+        // chatroomId와 userId로 chatroomUserDTO 찾기
+        Optional<ChatroomUserDTO> chatroomUserdto = chatroomUserService.getChatroomWithReceiver(userId, receiverId);
+        // 선물 메시지 생성
         MessageDTO messageDTO = MessageDTO.builder()
                 .isGift("Y")
                 .type(MessageDTO.MessageType.CHAT)
-                .chatroomId(chatroomId)
                 .sendDate(new Date())
                 .unreadCount(1)
-                .content(content)
+                .content(setGiftMessage(requestDTO))
                 .userId(userId)
                 .build();
-
-        messageService.sendAndSaveMessage(messageDTO, null);
-
+        
+        // 선물을 보내려는 사람 사이 채팅방이 한 번도 생성된 적이 없는 경우
+        if (chatroomUserdto.isEmpty()) {
+        	log.info("[CHATROOM] 채팅방 존재하지 않음");
+        	MessageWithSenderDTO messageWithSenderDTO = new MessageWithSenderDTO();
+        	ChatroomUserDTO chatroomUserDTO = new ChatroomUserDTO();
+        	
+        	chatroomUserDTO.setChatroomName(requestDTO.getReceiverName()+"님과의 채팅방");
+        	chatroomUserDTO.setConnectionStatus("OF"); // 아직 쇼핑몰에 머물러 있으므로 접속상태 OF
+        	chatroomUserDTO.setIsDarkMode("N"); // 기본값
+        	chatroomUserDTO.setUserId(userId);
+        	
+        	messageWithSenderDTO.setMessage(messageDTO);
+        	messageWithSenderDTO.setSender(chatroomUserDTO);
+        	messageWithSenderDTO.setReceiverId(requestDTO.getReceiverId());
+        	messageWithSenderDTO.setSenderName(requestDTO.getSenderName());
+        	
+        	// 채팅방 생성
+        	long newChatroomId = chatroomService.addChatroom(messageWithSenderDTO);
+        	log.info("newChatroomId {}", newChatroomId);
+        	messageDTO.setChatroomId(newChatroomId);
+        	
+        	// 두 사용자 각각의 ChtroomUsers 생성
+        	chatroomUserService.addChatroomUsers(messageWithSenderDTO, newChatroomId);
+        	// 메시지 전송
+        	messageService.sendAndSaveMessage(messageDTO, chatroomUserService.getChatroomUser(newChatroomId,userId).get());
+        } else {
+        	messageDTO.setChatroomId(chatroomUserdto.get().getChatroomId());
+        	// 채팅방이 존재하지만 삭제된 경우
+        	if (chatroomUserdto.get().getConnectionStatus().equals("DL")) {
+        		DeletedChatroomUserInfoDTO deletedChatrooms = DeletedChatroomUserInfoDTO.builder()
+												        			.chatroomId(chatroomUserdto.get().getChatroomId())
+												        			.senderId(userId)
+												        			.receiverId(receiverId)
+												        			.senderName(requestDTO.getSenderName())
+												        			.receiverName(requestDTO.getReceiverName())
+												        			.build();
+        		// 삭제된 채팅방 복구
+        		chatroomUserService.restoreChatroomBetweenUsers(deletedChatrooms);
+        		// 메시지 전송
+        	}
+        	messageService.sendAndSaveMessage(messageDTO, chatroomUserdto.get());
+        }
+        PaymentResponseDTO dto = requestPayment(requestDTO);        
         return dto;
     }
     
     //############### 선물 메시지 세팅 및 반환 ###############
     @Override
+    @Transactional
     public String setGiftMessage(PaymentRequestDTO requestDTO) {
 
         Order order = orderDAO.findById(requestDTO.getOrderId())
