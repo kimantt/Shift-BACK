@@ -19,8 +19,10 @@ import com.project.shift.chat.entity.ChatroomUserEntity;
 import com.project.shift.chat.exception.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ChatroomUserService {
 
@@ -33,9 +35,13 @@ public class ChatroomUserService {
 		// 채팅 생성자 생성 후 저장
 		ChatroomUserDTO sender = dto.getSender();		
 		sender.setChatroomId(chatroomId);
-		sender.setConnectionStatus("ON");
+		log.info("chatroomId = {}", chatroomId);
+		// connectionStatus가 정해지지 않았을 때. 친구 선택 후 선물하기에서는 OF로 정해짐
+		if (sender.getConnectionStatus() == null) {
+			sender.setConnectionStatus("ON");
+		}
 		chatroomUserDao.addChatroomUser(ChatroomUserEntity.toEntity(sender));
-		
+		log.info("chatroom users 저장됨");
 		// 채팅 수신자 생성 후 저장
 		ChatroomUserDTO receiver = ChatroomUserDTO.builder()
 									.chatroomId(chatroomId)
