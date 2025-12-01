@@ -17,8 +17,10 @@ import com.project.shift.chat.dto.MessageWithSenderDTO;
 import com.project.shift.chat.entity.ChatroomEntity;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ChatroomService {
 
@@ -69,7 +71,7 @@ public class ChatroomService {
 		// 저장 후 DB에서 생성된 PK 가져오기
 		ChatroomEntity entity = ChatroomEntity.toEntity(newChatroom);
 	    ChatroomEntity savedEntity = dao.saveChatroom(entity);
-	    
+	    log.info("[CHATRROM] 채팅방 생성 완료");
 	    return savedEntity.getChatroomId();
 	}
 	

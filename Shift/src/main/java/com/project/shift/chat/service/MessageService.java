@@ -87,7 +87,7 @@ public class MessageService {
 	        default :
 	            break;
 		}
-		
+		log.info("[CHAT] 브로드캐스팅 호출");
 		// 메시지 브로드캐스팅 로직 호출
 		broadcastToChatroom(messageDTO);
 	}
