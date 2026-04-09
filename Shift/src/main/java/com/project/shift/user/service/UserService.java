@@ -18,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -271,7 +271,7 @@ public class UserService {
         user.setAddress(null);
         user.setPoints(0);
         user.setRefreshToken(null);
-        user.setDeletedAt(new Timestamp(System.currentTimeMillis()));
+        user.setDeletedAt(LocalDateTime.now());
 
         userDAO.save(user);
 
