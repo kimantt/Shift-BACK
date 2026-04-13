@@ -6,10 +6,11 @@ import com.project.shift.shop.dao.CartDAO;
 import com.project.shift.shop.entity.Order;
 import com.project.shift.shop.repository.DeliveryRepository;
 import com.project.shift.shop.repository.OrderRepository;
-import com.project.shift.user.dao.IUserDAO;
 import com.project.shift.user.dto.LoginIdRequestDTO;
 import com.project.shift.user.dto.UserDTO;
 import com.project.shift.user.entity.UserEntity;
+import com.project.shift.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -28,7 +29,7 @@ import java.util.UUID;
 public class UserService {
     private final String DELETED_USER_PREFIX = "deleted_";
 
-    private final IUserDAO userDAO;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CartDAO cartDAO;
     private final FriendDAO friendDAO;
@@ -42,7 +43,7 @@ public class UserService {
         validateTermsAgreement(userDTO); //약관 동의 검증
 
         UserEntity userEntity = convertToEntity(userDTO);
-        UserEntity savedEntity = userDAO.save(userEntity);
+        UserEntity savedEntity = userRepository.save(userEntity);
 
         return savedEntity.getUserId();
     }
@@ -80,7 +81,7 @@ public class UserService {
             throw new IllegalArgumentException("'deleted'로 시작하는 ID는 사용할 수 없습니다.");
         }
 
-        return userDAO.existsByLoginId(loginId);
+        return userRepository.existsByLoginId(loginId);
     }
 
     //약관 동의 검증
@@ -100,7 +101,7 @@ public class UserService {
             throw new IllegalArgumentException("연락처는 11자리 숫자만 입력 가능합니다.");
         }
 
-        return userDAO.existsByPhone(phone);
+        return userRepository.existsByPhone(phone);
     }
 
     // 비밀번호 보안 규칙 검증
@@ -148,7 +149,7 @@ public class UserService {
         Long userId = Long.parseLong(auth.getName());
 
         //DB에서 회원 조회
-        UserEntity userEntity = userDAO.findById(userId)
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         //비밀번호 제외하고 DTO로 변환하여 반환
@@ -169,12 +170,12 @@ public class UserService {
         Long userId = Long.parseLong(auth.getName());
 
         //DB에서 회원 조회
-        UserEntity userEntity = userDAO.findById(userId)
+        UserEntity userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         // 연락처 변경 시 중복 검증
-        if (!userEntity.getPhone().equals(userDTO.getPhone())
-                && userDAO.existsByPhone(userDTO.getPhone())) {
+        if (!userEntity.getPhone().equals(userDTO.phone())
+                && userRepository.existsByPhone(userDTO.phone())) {
             throw new IllegalArgumentException("이미 사용중인 연락처 입니다.");
         }
 
@@ -196,7 +197,7 @@ public class UserService {
     public String findId(LoginIdRequestDTO loginIdRequestDTO) {
         validateDTO(loginIdRequestDTO);
 
-        UserEntity userEntity = userDAO.findByNameAndPhone(loginIdRequestDTO.name(), loginIdRequestDTO.phone())
+        UserEntity userEntity = userRepository.findByNameAndPhone(loginIdRequestDTO.name(), loginIdRequestDTO.phone())
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 사용자가 없습니다."));
 
         return maskLoginId(userEntity.getLoginId());
@@ -225,7 +226,7 @@ public class UserService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         long userId = Long.parseLong(auth.getName());
 
-        UserEntity user = userDAO.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return passwordEncoder.matches(password, user.getPassword());
@@ -256,7 +257,7 @@ public class UserService {
         friendDAO.deleteAllFriends(userId); // 친구 관계 삭제
         chatroomUserDAO.deleteChatroomUsersByUserId(userId);
 
-        UserEntity user = userDAO.findById(userId)
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 로그인 ID 변경 처리
@@ -273,7 +274,7 @@ public class UserService {
         user.setRefreshToken(null);
         user.setDeletedAt(LocalDateTime.now());
 
-        userDAO.save(user);
+        userRepository.save(user);
 
         // SecurityContext 초기화 (로그아웃 처리)
         SecurityContextHolder.clearContext();
