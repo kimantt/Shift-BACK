@@ -127,7 +127,7 @@ public class UserController {
         try {
             UserDTO user = userService.getUserInfo();
             return ResponseEntity.ok(Map.of(
-                    "points", user.getPoints()
+                    "points", user.points()
             ));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));

@@ -50,15 +50,15 @@ public class UserService {
 
     //사용자 이름 검증
     private void validateName(UserDTO userDTO) {
-        if (userDTO.getName() == null || userDTO.getName().trim().isEmpty()) {
+        if (userDTO.name() == null || userDTO.name().trim().isEmpty()) {
             throw new IllegalArgumentException("이름을 입력해야 합니다.");
         }
 
-        if (userDTO.getName().length() < 2 || userDTO.getName().length() > 6) {
+        if (userDTO.name().length() < 2 || userDTO.name().length() > 6) {
             throw new IllegalArgumentException("이름은 2자 이상 6자 이하로 입력해야 합니다.");
         }
 
-        if (!userDTO.getName().matches("^[가-힣\\s]+$")) {
+        if (!userDTO.name().matches("^[가-힣\\s]+$")) {
             throw new IllegalArgumentException("이름은 한글만 사용할 수 있습니다.");
         }
     }
@@ -86,7 +86,7 @@ public class UserService {
 
     //약관 동의 검증
     private void validateTermsAgreement(UserDTO userDTO) {
-        if (userDTO.getTermsAgreed() == null || !userDTO.getTermsAgreed()) {
+        if (userDTO.termsAgreed() == null || !userDTO.termsAgreed()) {
             throw new IllegalArgumentException("이용약관에 동의해야 합니다.");
         }
     }
@@ -132,11 +132,11 @@ public class UserService {
     //DTO를 Entity로 변환 및 암호화된 비밀번호 설정
     private UserEntity convertToEntity(UserDTO userDTO) {
         return UserEntity.builder()
-                .loginId(userDTO.getLoginId())
-                .password(passwordEncoder.encode(userDTO.getPassword()))
-                .name(userDTO.getName())
-                .phone(userDTO.getPhone())
-                .address(userDTO.getAddress())
+                .loginId(userDTO.loginId())
+                .password(passwordEncoder.encode(userDTO.password()))
+                .name(userDTO.name())
+                .phone(userDTO.phone())
+                .address(userDTO.address())
                 .points(0)
                 .adminFlag("N")
                 .build();
@@ -180,7 +180,7 @@ public class UserService {
         }
 
         //회원 정보 수정(Entity 업데이트)
-        userEntity.updateInfo(userDTO.getName(), userDTO.getPhone(), userDTO.getAddress());
+        userEntity.updateInfo(userDTO.name(), userDTO.phone(), userDTO.address());
 
         return UserDTO.builder()
                 .userId(userEntity.getUserId())
