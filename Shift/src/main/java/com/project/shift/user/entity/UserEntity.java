@@ -26,7 +26,6 @@ import java.util.List;
 )
 @SQLRestriction("DELETED_AT IS NULL") //DELETED_AT이 NULL인 값만 조회하도록 설정
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
 
@@ -50,9 +49,11 @@ public class UserEntity {
     @Column(length = 200)
     private String address;
 
+    @Setter
     @Column(nullable = false)
     private Integer points;
 
+    @Setter
     @Column(name = "refresh_token", length = 255)
     private String refreshToken;
 
@@ -88,6 +89,18 @@ public class UserEntity {
         this.name = name;
         this.phone = phone;
         this.address = address;
+    }
+    
+    // 회원 탈퇴 처리 (로그인 ID 변경, 비밀번호 폐기, 개인정보 초기화)
+    public void withdraw(String deletedLoginId, String discardedPassword, LocalDateTime deletedAt) {
+        this.loginId = deletedLoginId;
+        this.password = discardedPassword;
+        this.name = "탈퇴한 사용자";
+        this.phone = null;
+        this.address = null;
+        this.points = 0;
+        this.refreshToken = null;
+        this.deletedAt = deletedAt;
     }
     
     // --------------------

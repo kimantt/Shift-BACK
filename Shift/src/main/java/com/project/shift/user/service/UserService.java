@@ -260,19 +260,10 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 로그인 ID 변경 처리
-        user.setLoginId(DELETED_USER_PREFIX + user.getUserId());
-
-        // 비밀번호 폐기
-        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-
-        // 기타 개인정보 초기화
-        user.setName("탈퇴한 사용자");
-        user.setPhone(null);
-        user.setAddress(null);
-        user.setPoints(0);
-        user.setRefreshToken(null);
-        user.setDeletedAt(LocalDateTime.now());
+        // 회원 탈퇴 처리
+        String deletedLoginId = DELETED_USER_PREFIX + user.getUserId();
+        String discardedPassword = passwordEncoder.encode(UUID.randomUUID().toString());
+        user.withdraw(deletedLoginId, discardedPassword, LocalDateTime.now());
 
         userRepository.save(user);
 
