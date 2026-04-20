@@ -8,12 +8,9 @@ import com.project.shift.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
-import static com.project.shift.global.security.CurrentUser.getUserIdOrNull;
 
 @RestController
 @RequestMapping("/users")
@@ -110,15 +107,10 @@ public class UserController {
     }
 
     // SHOP-011 포인트 사용/적립 내역 조회
-    @GetMapping("/{userId}/points")
-    public ResponseEntity<PointHistoryResponseDTO> getPointHistory(@PathVariable Long userId) {
-
-        // JWT 우선 적용 — 본인 계정만 조회 가능
-        Long uid = getUserIdOrNull();
-        if (uid != null && !uid.equals(userId))
-            throw new AccessDeniedException("본인 계정만 조회 가능합니다.");
-
-        return ResponseEntity.ok(orderService.getPointHistory(userId));
+    @GetMapping("/points-history")
+    public ResponseEntity<PointHistoryResponseDTO> getPointHistory() {
+    	UserDTO user = userService.getUserInfo();
+        return ResponseEntity.ok(orderService.getPointHistory(user.userId()));
     }
 
     // 마이포인트 조회
