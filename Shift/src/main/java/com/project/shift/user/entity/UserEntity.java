@@ -12,6 +12,7 @@ import com.project.shift.product.entity.PointTransaction;
 import com.project.shift.product.entity.Review;
 import com.project.shift.shop.entity.Cart;
 import com.project.shift.shop.entity.Order;
+import com.project.shift.auth.entity.RefreshTokenEntity;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -53,10 +54,6 @@ public class UserEntity {
     @Column(nullable = false)
     private Integer points;
 
-    @Setter
-    @Column(name = "refresh_token", length = 255)
-    private String refreshToken;
-
     @Column(name = "admin_flag", nullable = false, length = 1)
     private String adminFlag;
 
@@ -70,7 +67,6 @@ public class UserEntity {
                 String phone,
                 String address,
                 Integer points,
-                String refreshToken,
                 String adminFlag,
                 LocalDateTime deletedAt) {
         this.loginId = loginId;
@@ -79,7 +75,6 @@ public class UserEntity {
         this.phone = phone;
         this.address = address;
         this.points = (points == null) ? 0 : points;
-        this.refreshToken = refreshToken;
         this.adminFlag = (adminFlag == null) ? "N" : adminFlag;
         this.deletedAt = deletedAt;
     }
@@ -99,7 +94,6 @@ public class UserEntity {
         this.phone = null;
         this.address = null;
         this.points = 0;
-        this.refreshToken = null;
         this.deletedAt = deletedAt;
     }
     
@@ -146,4 +140,8 @@ public class UserEntity {
 //    // point_transactions.user_id
 //    @OneToMany(mappedBy = "userId", fetch = FetchType.LAZY)
 //    private List<PointTransaction> pointTransactions = new ArrayList<>();
+//
+//    // refreshtokens.user_id
+//    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+//    private RefreshTokenEntity refreshToken;
 }

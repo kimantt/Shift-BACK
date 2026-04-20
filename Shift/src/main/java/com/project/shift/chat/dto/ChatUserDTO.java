@@ -20,7 +20,6 @@ public class ChatUserDTO {
     private String phone;
     private String address;
     private int points;
-    private String refreshToken;
     private String adminFlag; // DEFAULT 'N', 'Y' 또는 'N'
 
     // Entity -> DTO 변환
@@ -33,7 +32,6 @@ public class ChatUserDTO {
                 .phone(entity.getPhone())
                 .address(entity.getAddress())
                 .points(entity.getPoints())
-                .refreshToken(entity.getRefreshToken())
                 .adminFlag(entity.getAdminFlag())
                 .build(); // 생성자 호출
     }

@@ -54,8 +54,7 @@ public class AuthService {
         String accessToken = jwtService.createAccessToken(userId, name);
         String refreshToken = jwtService.createRefreshToken(userId);
 
-        foundUser.setRefreshToken(refreshToken);
-        authDao.updateUser(foundUser);
+        authDao.saveRefreshToken(foundUser, refreshToken);
 
         log.info("[AUTH] 리프레시 토큰 갱신 완료 UserId: {}", userId);
 
@@ -92,8 +91,7 @@ public class AuthService {
         String newRefreshToken = jwtService.createRefreshToken(foundUser.getUserId());
 
         // DB값 갱신
-        foundUser.setRefreshToken(newRefreshToken);
-        authDao.updateUser(foundUser);
+        authDao.saveRefreshToken(foundUser, newRefreshToken);
 
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
@@ -128,7 +126,8 @@ public class AuthService {
         // userId로 사용자 조회
         UserEntity foundUser = authDao.getUserById(userId);
 
-        if (foundUser == null || !refreshToken.equals(foundUser.getRefreshToken())) {
+        String savedRefreshToken = authDao.getRefreshToken(userId);
+        if (foundUser == null || !refreshToken.equals(savedRefreshToken)) {
             throw new BadCredentialsException("[SYSTEM] 리프레시 토큰이 저장된 리프레시 토큰과 일치하지 않습니다.");
         }
 

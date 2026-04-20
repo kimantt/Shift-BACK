@@ -58,9 +58,6 @@ public class ChatUserEntity {
     @Column(name = "POINTS")
     private int points; // DEFAULT 0
 
-    @Column(name = "REFRESH_TOKEN", length = 255)
-    private String refreshToken;
-
     @Column(name = "ADMIN_FLAG", nullable = false, length = 1, columnDefinition = "CHAR(1)")
     private String adminFlag;// DEFAULT 'N', 'Y' 또는 'N'
     
@@ -77,7 +74,6 @@ public class ChatUserEntity {
                 .phone(dto.getPhone())
                 .address(dto.getAddress())
                 .points(dto.getPoints())
-                .refreshToken(dto.getRefreshToken())
                 .adminFlag(dto.getAdminFlag())
                 .build();
     }

@@ -8,7 +8,9 @@ public interface IAuthDAO {
 
     UserEntity getUserById(Long userId);
 
-    void updateUser(UserEntity userEntity);
+    void saveRefreshToken(UserEntity userEntity, String refreshToken);
+
+    String getRefreshToken(Long userId);
 
     void updateRefreshToken(Long userId);
 }
