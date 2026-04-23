@@ -1,8 +1,10 @@
 package com.project.shift.auth.service;
 
-import com.project.shift.auth.dao.AuthDAO;
 import com.project.shift.auth.dto.request.LoginRequestDTO;
 import com.project.shift.auth.dto.response.LoginResponseDTO;
+import com.project.shift.auth.entity.RefreshTokenEntity;
+import com.project.shift.auth.repository.AuthRepository;
+import com.project.shift.auth.repository.RefreshTokenRepository;
 import com.project.shift.global.jwt.JwtService;
 import com.project.shift.user.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
-    private final AuthDAO authDao;
+	private final AuthRepository authRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthService(AuthDAO authDao, JwtService jwtService, AuthenticationManager authenticationManager) {
-        this.authDao = authDao;
+    public AuthService(AuthRepository authRepository,
+            RefreshTokenRepository refreshTokenRepository,
+            JwtService jwtService,
+            AuthenticationManager authenticationManager) {
+		this.authRepository = authRepository;
+		this.refreshTokenRepository = refreshTokenRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
@@ -41,10 +48,8 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         // dto -> entity로 변환
-        UserEntity userEntity = UserEntity.builder()
-                .loginId(loginInfo.loginId())
-                .build();
-        UserEntity foundUser = authDao.getUser(userEntity);
+        UserEntity foundUser = authRepository.findByLoginId(loginInfo.loginId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         Long userId = foundUser.getUserId();
         String name = foundUser.getName();
@@ -54,7 +59,7 @@ public class AuthService {
         String accessToken = jwtService.createAccessToken(userId, name);
         String refreshToken = jwtService.createRefreshToken(userId);
 
-        authDao.saveRefreshToken(foundUser, refreshToken);
+        saveRefreshToken(foundUser, refreshToken);
 
         log.info("[AUTH] 리프레시 토큰 갱신 완료 UserId: {}", userId);
 
@@ -69,7 +74,7 @@ public class AuthService {
         log.info("[AUTH] 로그아웃 시작 UserId: {}", userId);
         
         // DB의 리프레시 토큰 삭제
-        authDao.updateRefreshToken(userId);
+        refreshTokenRepository.deleteById(userId);
 
         log.info("[AUTH] 로그아웃 완료 UserId: {}", userId);
     }
@@ -91,7 +96,7 @@ public class AuthService {
         String newRefreshToken = jwtService.createRefreshToken(foundUser.getUserId());
 
         // DB값 갱신
-        authDao.saveRefreshToken(foundUser, newRefreshToken);
+        saveRefreshToken(foundUser, newRefreshToken);
 
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
@@ -124,13 +129,26 @@ public class AuthService {
 
     private UserEntity validateUserByToken(Long userId, String refreshToken) {
         // userId로 사용자 조회
-        UserEntity foundUser = authDao.getUserById(userId);
+    	UserEntity foundUser = authRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        String savedRefreshToken = authDao.getRefreshToken(userId);
-        if (foundUser == null || !refreshToken.equals(savedRefreshToken)) {
+        String savedRefreshToken = refreshTokenRepository.findById(userId)
+                .map(RefreshTokenEntity::getRefreshToken)
+                .orElse(null);
+
+        if (!refreshToken.equals(savedRefreshToken)) {
             throw new BadCredentialsException("[SYSTEM] 리프레시 토큰이 저장된 리프레시 토큰과 일치하지 않습니다.");
         }
 
         return foundUser;
+    }
+    
+    private void saveRefreshToken(UserEntity userEntity, String refreshToken) {
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findById(userEntity.getUserId())
+                .orElse(RefreshTokenEntity.builder()
+                        .user(userEntity)
+                        .build());
+        refreshTokenEntity.updateRefreshToken(refreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
     }
 }
