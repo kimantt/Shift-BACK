@@ -1,5 +1,7 @@
 package com.project.shift.auth.entity;
 
+import java.time.LocalDateTime;
+
 import com.project.shift.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
@@ -30,8 +32,11 @@ public class RefreshTokenEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @Column(name = "refresh_token", length = 255)
+    @Column(name = "refresh_token", nullable = false, length = 255)
     private String refreshToken;
+    
+    @Column(name = "expired_at", nullable = false)
+    private LocalDateTime expiredAt;
 
     @Builder
     public RefreshTokenEntity(UserEntity user, String refreshToken) {
