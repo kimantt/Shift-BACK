@@ -1,6 +1,5 @@
 package com.project.shift.user.controller;
 
-import com.project.shift.global.exception.detail.UserValidationException;
 import com.project.shift.shop.dto.PointHistoryResponseDTO;
 import com.project.shift.shop.service.IOrderService;
 import com.project.shift.user.dto.request.LoginIdCheckRequestDTO;
@@ -17,6 +16,8 @@ import com.project.shift.user.dto.response.PasswordCheckResponseDTO;
 import com.project.shift.user.dto.response.PointsResponseDTO;
 import com.project.shift.user.dto.response.UserInfoResponseDTO;
 import com.project.shift.user.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class UserController {
     private final IOrderService orderService;
 
     @PostMapping
-    public ResponseEntity<MessageResponseDTO> registerUser(@RequestBody RegisterUserRequestDTO userDTO) {
+    public ResponseEntity<MessageResponseDTO> registerUser(@Valid @RequestBody RegisterUserRequestDTO userDTO) {
     	//서버 회원가입 요청
     	Long userId = userService.join(userDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -39,7 +40,7 @@ public class UserController {
 
     // 연락처 중복 확인
     @PostMapping("/check/phone")
-    public ResponseEntity<AvailabilityCheckResponseDTO> checkPhone(@RequestBody PhoneCheckRequestDTO request) {
+    public ResponseEntity<AvailabilityCheckResponseDTO> checkPhone(@Valid @RequestBody PhoneCheckRequestDTO request) {
     	String phone = request.phone();
         boolean isDuplicate = userService.isPhoneAvailable(phone);
         return ResponseEntity.ok(new AvailabilityCheckResponseDTO(
@@ -50,7 +51,7 @@ public class UserController {
 
     // 아이디 중복 확인
     @PostMapping("/check")
-    public ResponseEntity<AvailabilityCheckResponseDTO> checkLoginId(@RequestBody LoginIdCheckRequestDTO request) {
+    public ResponseEntity<AvailabilityCheckResponseDTO> checkLoginId(@Valid @RequestBody LoginIdCheckRequestDTO request) {
     	String loginId = request.loginId();
         boolean isDuplicate = userService.isLoginIdAvailable(loginId);
         return ResponseEntity.ok(new AvailabilityCheckResponseDTO(
@@ -61,7 +62,7 @@ public class UserController {
 
     // 비밀번호 보안 규칙 검증
     @PostMapping("/check/pw-rule")
-    public ResponseEntity<PasswordCheckResponseDTO> checkPasswordRule(@RequestBody PasswordRuleCheckRequestDTO request) {
+    public ResponseEntity<PasswordCheckResponseDTO> checkPasswordRule(@Valid @RequestBody PasswordRuleCheckRequestDTO request) {
     	String password = request.password();
         userService.validatePasswordRule(password);
         return ResponseEntity.ok(new PasswordCheckResponseDTO(true, "사용 가능한 비밀번호입니다."));
@@ -77,14 +78,14 @@ public class UserController {
     // 본인 정보 수정
     @PutMapping("/info")
     public ResponseEntity<UserInfoResponseDTO> updateMyInfo(
-            @RequestBody UpdateUserInfoRequestDTO userDTO) {
+    		@Valid @RequestBody UpdateUserInfoRequestDTO userDTO) {
     	UserInfoResponseDTO updatedUser = userService.updateUserInfo(userDTO);
         return ResponseEntity.ok(updatedUser);
     }
 
     // 아이디 찾기
     @PostMapping("/find-id")
-    public ResponseEntity<LoginIdFindResponseDTO> findId(@RequestBody LoginIdRequestDTO loginIdRequestDTO) {
+    public ResponseEntity<LoginIdFindResponseDTO> findId(@Valid @RequestBody LoginIdRequestDTO loginIdRequestDTO) {
         String loginId = userService.findId(loginIdRequestDTO);
         return ResponseEntity.ok(new LoginIdFindResponseDTO(loginId));
     }
@@ -105,13 +106,8 @@ public class UserController {
 
     // 비밀번호 인증
     @PostMapping("/check/password")
-    public ResponseEntity<PasswordCheckResponseDTO> verifyPassword(@RequestBody PasswordVerifyRequestDTO request) {
-        String password = request.password();
-        if (password == null || password.isBlank()) {
-        	throw new UserValidationException("비밀번호를 입력해주세요.");
-        }
-
-        boolean isValid = userService.verifyPassword(password);
+    public ResponseEntity<PasswordCheckResponseDTO> verifyPassword(@Valid @RequestBody PasswordVerifyRequestDTO request) {
+        boolean isValid = userService.verifyPassword(request.password());
         return ResponseEntity.ok(new PasswordCheckResponseDTO(
                 isValid,
                 isValid ? "비밀번호 인증에 성공했습니다." : "비밀번호가 일치하지 않습니다."

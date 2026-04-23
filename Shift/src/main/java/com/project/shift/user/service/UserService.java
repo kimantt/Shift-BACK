@@ -45,68 +45,19 @@ public class UserService {
 
     @Transactional
     public Long join(RegisterUserRequestDTO userDTO) {
-        validateName(userDTO);  //사용자 이름 검증
-        validateTermsAgreement(userDTO); //약관 동의 검증
-
         UserEntity userEntity = convertToEntity(userDTO);
         UserEntity savedEntity = userRepository.save(userEntity);
 
         return savedEntity.getUserId();
     }
 
-    //사용자 이름 검증
-    private void validateName(RegisterUserRequestDTO userDTO) {
-        if (userDTO.name() == null || userDTO.name().trim().isEmpty()) {
-            throw new UserValidationException("이름을 입력해야 합니다.");
-        }
-
-        if (userDTO.name().length() < 2 || userDTO.name().length() > 6) {
-            throw new UserValidationException("이름은 2자 이상 6자 이하로 입력해야 합니다.");
-        }
-
-        if (!userDTO.name().matches("^[가-힣\\s]+$")) {
-            throw new UserValidationException("이름은 한글만 사용할 수 있습니다.");
-        }
-    }
-
     // 아이디 중복 확인 - 사용 가능 여부 반환
     public boolean isLoginIdAvailable(String loginId) {
-        if (loginId == null || loginId.trim().isEmpty()) {
-            throw new UserValidationException("아이디를 입력해주세요.");
-        }
-
-        if (loginId.length() < 4 || loginId.length() > 20) {
-            throw new UserValidationException("아이디는 4자 이상 20자 이하로 설정해야 합니다.");
-        }
-
-        if (!loginId.matches("^[A-Za-z0-9]+$")) {
-            throw new UserValidationException("아이디는 영문과 숫자만 사용할 수 있습니다.");
-        }
-
-        if (loginId.toLowerCase().startsWith("deleted")) {
-            throw new UserValidationException("'deleted'로 시작하는 ID는 사용할 수 없습니다.");
-        }
-
         return userRepository.existsByLoginId(loginId);
-    }
-
-    //약관 동의 검증
-    private void validateTermsAgreement(RegisterUserRequestDTO userDTO) {
-        if (userDTO.termsAgreed() == null || !userDTO.termsAgreed()) {
-            throw new UserValidationException("이용약관에 동의해야 합니다.");
-        }
     }
 
     // 연락처 중복 확인 - 사용 가능 여부 반환
     public boolean isPhoneAvailable(String phone) {
-        if (phone == null || phone.trim().isEmpty()) {
-            throw new UserValidationException("연락처를 입력해주세요.");
-        }
-
-        if (!phone.matches("^[0-9]{11}$")) {
-            throw new UserValidationException("연락처는 11자리 숫자만 입력 가능합니다.");
-        }
-
         return userRepository.existsByPhone(phone);
     }
 
@@ -201,8 +152,6 @@ public class UserService {
     // 아이디 찾기
     @Transactional(readOnly = true)
     public String findId(LoginIdRequestDTO loginIdRequestDTO) {
-        validateDTO(loginIdRequestDTO);
-
         UserEntity userEntity = userRepository.findByNameAndPhone(loginIdRequestDTO.name(), loginIdRequestDTO.phone())
                 .orElseThrow(() -> new UserNotFoundException("일치하는 사용자가 없습니다."));
 
@@ -217,22 +166,9 @@ public class UserService {
                 "*".repeat(maskLength);
     }
 
-    private void validateDTO(LoginIdRequestDTO userFindDTO) {
-        if (userFindDTO.name() == null || userFindDTO.name().isBlank()) {
-            throw new UserValidationException("[SYSTEM] 이름은 필수 입력 항목입니다.");
-        }
-        if (userFindDTO.phone() == null || userFindDTO.phone().isBlank()) {
-            throw new UserValidationException("[SYSTEM] 연락처는 필수 입력 항목입니다.");
-        }
-    }
-
     // 비밀번호 인증
     @Transactional(readOnly = true)
     public boolean verifyPassword(String password) {
-    	if (password == null || password.isBlank()) {
-            throw new UserValidationException("비밀번호를 입력해주세요.");
-        }
-    	
     	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         long userId = Long.parseLong(auth.getName());
 

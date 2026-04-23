@@ -1,5 +1,10 @@
 package com.project.shift.user.dto.request;
 
-public record PasswordVerifyRequestDTO(String password) {
+import jakarta.validation.constraints.NotBlank;
+
+public record PasswordVerifyRequestDTO(
+		@NotBlank(message = "비밀번호를 입력해주세요.")
+        String password
+		) {
 
 }

@@ -1,5 +1,17 @@
 package com.project.shift.user.dto.request;
 
-public record LoginIdCheckRequestDTO(String loginId) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+public record LoginIdCheckRequestDTO(
+		@NotBlank(message = "아이디를 입력해주세요.")
+        @Size(min = 4, max = 20, message = "아이디는 4자 이상 20자 이하로 설정해야 합니다.")
+		@Pattern.List({
+            @Pattern(regexp = "^[A-Za-z0-9]+$", message = "아이디는 영문과 숫자만 사용할 수 있습니다."),
+            @Pattern(regexp = "^(?!deleted).*$", flags = Pattern.Flag.CASE_INSENSITIVE, message = "'deleted'로 시작하는 ID는 사용할 수 없습니다.")
+		})
+        String loginId
+		) {
 
 }
