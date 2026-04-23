@@ -2,6 +2,7 @@ package com.project.shift.auth.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -51,6 +52,7 @@ class RefreshTokenEntityLazyLoadingTest {
         RefreshTokenEntity savedRefreshToken = refreshTokenRepository.save(RefreshTokenEntity.builder()
                 .user(savedUser)
                 .refreshToken("refresh-token-value")
+                .expiredAt(LocalDateTime.now().plusDays(7))
                 .build());
 
         // INSERT SQL을 DB에 즉시 반영
