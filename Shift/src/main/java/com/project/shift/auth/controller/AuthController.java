@@ -1,7 +1,9 @@
 package com.project.shift.auth.controller;
 
 import com.project.shift.auth.dto.request.LoginRequestDTO;
+import com.project.shift.auth.dto.response.AccessTokenResponseDTO;
 import com.project.shift.auth.dto.response.LoginResponseDTO;
+import com.project.shift.auth.dto.response.LogoutResponseDTO;
 import com.project.shift.auth.service.AuthService;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,8 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -29,7 +29,7 @@ public class AuthController {
 
     // 로그인 기능
     @PostMapping("/login")
-    public ResponseEntity<?> userLogin(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response) {
+    public ResponseEntity<AccessTokenResponseDTO> userLogin(@Valid @RequestBody LoginRequestDTO request, HttpServletResponse response) {
         log.info("[AUTH] 로그인 시도 User ID: {}", request.loginId());
         
         LoginResponseDTO tokens = authService.login(request);
@@ -38,11 +38,11 @@ public class AuthController {
         ResponseCookie cookie = authService.createRefreshTokenCookie(tokens.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok(Map.of("accessToken", tokens.accessToken()));
+        return ResponseEntity.ok(new AccessTokenResponseDTO(tokens.accessToken()));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<LogoutResponseDTO> logout() {
         authService.logout();
 
         // 로그아웃 시 쿠키 삭제
@@ -51,13 +51,13 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .header("Clear-Site-Data", "\"cookies\", \"storage\", \"cache\"") // 좀비 쿠키 방지를 위한 추가 헤더
-                .body(Map.of("message", "로그아웃이 정상적으로 처리되었습니다."));
+                .body(new LogoutResponseDTO("로그아웃이 정상적으로 처리되었습니다."));
     }
 
     // Access 토큰 재발급 기능
     @PostMapping("/refresh")
-    public ResponseEntity<?> refreshToken(@RequestHeader(value = HEADER, required = false) String authorizationHeader,
-                                          @CookieValue(name = "refreshToken", required = false) String refreshToken) {
+    public ResponseEntity<AccessTokenResponseDTO> refreshToken(@RequestHeader(value = HEADER, required = false) String authorizationHeader,
+                                          					   @CookieValue(name = "refreshToken", required = false) String refreshToken) {
         // 토큰 재발급 서비스 호출
     	LoginResponseDTO tokens = authService.refresh(authorizationHeader, refreshToken);
 
@@ -66,6 +66,6 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
-                .body(Map.of("accessToken", tokens.accessToken()));
+                .body(new AccessTokenResponseDTO(tokens.accessToken()));
     }
 }
