@@ -1,8 +1,8 @@
 package com.project.shift.auth.service;
 
 import com.project.shift.auth.dao.AuthDAO;
-import com.project.shift.auth.dto.LoginRequestDTO;
-import com.project.shift.auth.dto.LoginResponseDTO;
+import com.project.shift.auth.dto.request.LoginRequestDTO;
+import com.project.shift.auth.dto.response.LoginResponseDTO;
 import com.project.shift.global.jwt.JwtService;
 import com.project.shift.user.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
