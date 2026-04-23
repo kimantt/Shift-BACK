@@ -1,4 +1,4 @@
-package com.project.shift.global.exception.detail;
+package com.project.shift.global.exception.detail.user;
 
 import org.springframework.http.HttpStatus;
 

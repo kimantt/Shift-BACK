@@ -2,10 +2,10 @@ package com.project.shift.user.service;
 
 import com.project.shift.chat.dao.ChatroomUserDAO;
 import com.project.shift.chat.dao.FriendDAO;
-import com.project.shift.global.exception.detail.UserConflictException;
-import com.project.shift.global.exception.detail.UserNotFoundException;
-import com.project.shift.global.exception.detail.UserValidationException;
-import com.project.shift.global.exception.detail.UserWithdrawalNotAllowedException;
+import com.project.shift.global.exception.detail.user.UserConflictException;
+import com.project.shift.global.exception.detail.user.UserNotFoundException;
+import com.project.shift.global.exception.detail.user.UserValidationException;
+import com.project.shift.global.exception.detail.user.UserWithdrawalNotAllowedException;
 import com.project.shift.shop.dao.CartDAO;
 import com.project.shift.shop.entity.Order;
 import com.project.shift.shop.repository.DeliveryRepository;

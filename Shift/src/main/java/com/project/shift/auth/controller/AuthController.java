@@ -3,6 +3,7 @@ package com.project.shift.auth.controller;
 import com.project.shift.auth.dto.request.LoginRequestDTO;
 import com.project.shift.auth.dto.response.LoginResponseDTO;
 import com.project.shift.auth.service.AuthService;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,6 @@ import java.util.Map;
 public class AuthController {
 
     private final String HEADER = "Authorization";
-    private final String TOKEN_HEADER = "Bearer ";
 
     private final AuthService authService;
 
@@ -35,7 +35,7 @@ public class AuthController {
         LoginResponseDTO tokens = authService.login(request);
         log.info("[AUTH] 로그인 성공 User ID: {}", request.loginId());
 
-        ResponseCookie cookie = createRefreshTokenCookie(tokens.refreshToken());
+        ResponseCookie cookie = authService.createRefreshTokenCookie(tokens.refreshToken());
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(Map.of("accessToken", tokens.accessToken()));
@@ -46,13 +46,7 @@ public class AuthController {
         authService.logout();
 
         // 로그아웃 시 쿠키 삭제
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-                .path("/auth/refresh")
-                .maxAge(0) // 즉시 만료
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .build();
+        ResponseCookie deleteCookie = authService.createDeleteRefreshTokenCookie();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
@@ -64,38 +58,14 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestHeader(value = HEADER, required = false) String authorizationHeader,
                                           @CookieValue(name = "refreshToken", required = false) String refreshToken) {
-        // 쿠키 유효성 검사
-        if (refreshToken == null) {
-            throw new IllegalArgumentException("[SYSTEM] 리프레시 토큰이 존재하지 않습니다.");
-        }
-
-        // 헤더 유효성 검사
-        if (authorizationHeader == null || !authorizationHeader.startsWith(TOKEN_HEADER)) {
-            throw new IllegalArgumentException("[SYSTEM] Access Token이 올바르지 않습니다.");
-        }
-
-        // 헤더에서 토큰 추출
-        String accessToken = authorizationHeader.replace(TOKEN_HEADER, "");
-
         // 토큰 재발급 서비스 호출
-        LoginResponseDTO tokens = authService.refresh(accessToken, refreshToken);
+    	LoginResponseDTO tokens = authService.refresh(authorizationHeader, refreshToken);
 
         // 새로운 리프레시 토큰 쿠키 생성
-        ResponseCookie newRefreshCookie = createRefreshTokenCookie(tokens.refreshToken());
+        ResponseCookie newRefreshCookie = authService.createRefreshTokenCookie(tokens.refreshToken());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
                 .body(Map.of("accessToken", tokens.accessToken()));
-    }
-
-    // 리프레시 토큰 쿠키 생성
-    private ResponseCookie createRefreshTokenCookie(String refreshToken) {
-        return ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true) // JavaScript에서 접근 불가
-                .secure(false)
-                .path("/auth/refresh") // 특정 경로에서만 전송
-                .maxAge(7 * 24 * 60 * 60) // 7일
-                .sameSite("Lax") // CSRF 방어
-                .build();
     }
 }
