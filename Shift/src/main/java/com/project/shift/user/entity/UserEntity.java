@@ -35,7 +35,7 @@ public class UserEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "login_id", nullable = false, unique = true, length = 20)
+    @Column(name = "login_id", nullable = false, unique = true, length = 30)
     private String loginId;
 
     @Column(nullable = false, length = 100)

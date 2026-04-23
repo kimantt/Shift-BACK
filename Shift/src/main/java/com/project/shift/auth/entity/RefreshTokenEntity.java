@@ -39,9 +39,10 @@ public class RefreshTokenEntity {
     private LocalDateTime expiredAt;
 
     @Builder
-    public RefreshTokenEntity(UserEntity user, String refreshToken) {
+    public RefreshTokenEntity(UserEntity user, String refreshToken, LocalDateTime expiredAt) {
         this.user = user;
         this.refreshToken = refreshToken;
+        this.expiredAt = expiredAt;
     }
 
     public void updateRefreshToken(String refreshToken) {
