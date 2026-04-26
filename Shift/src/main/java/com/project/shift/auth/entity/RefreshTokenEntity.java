@@ -2,15 +2,9 @@ package com.project.shift.auth.entity;
 
 import java.time.LocalDateTime;
 
-import com.project.shift.user.entity.UserEntity;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,11 +21,6 @@ public class RefreshTokenEntity {
     @Column(name = "user_id")
     private Long userId;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
-
     @Column(name = "refresh_token", nullable = false, length = 255)
     private String refreshToken;
     
@@ -39,8 +28,8 @@ public class RefreshTokenEntity {
     private LocalDateTime expiredAt;
 
     @Builder
-    public RefreshTokenEntity(UserEntity user, String refreshToken, LocalDateTime expiredAt) {
-        this.user = user;
+    public RefreshTokenEntity(Long userId, String refreshToken, LocalDateTime expiredAt) {
+        this.userId = userId;
         this.refreshToken = refreshToken;
         this.expiredAt = expiredAt;
     }

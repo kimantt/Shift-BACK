@@ -12,6 +12,8 @@ import com.project.shift.global.jwt.JwtService;
 import com.project.shift.user.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
+
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,7 +67,7 @@ public class AuthService {
         String accessToken = jwtService.createAccessToken(userId, name);
         String refreshToken = jwtService.createRefreshToken(userId);
 
-        saveRefreshToken(foundUser, refreshToken);
+        saveRefreshToken(foundUser.getUserId(), refreshToken);
 
         log.info("[AUTH] 리프레시 토큰 갱신 완료 UserId: {}", userId);
 
@@ -103,7 +105,7 @@ public class AuthService {
         String newRefreshToken = jwtService.createRefreshToken(foundUser.getUserId());
 
         // DB값 갱신
-        saveRefreshToken(foundUser, newRefreshToken);
+        saveRefreshToken(foundUser.getUserId(), newRefreshToken);
 
         return new LoginResponseDTO(newAccessToken, newRefreshToken);
     }
@@ -193,10 +195,11 @@ public class AuthService {
     }
     
     // 리프레시 토큰을 저장하거나 갱신하는 메서드
-    private void saveRefreshToken(UserEntity userEntity, String refreshToken) {
-        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findById(userEntity.getUserId())
+    private void saveRefreshToken(Long userId, String refreshToken) {
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findById(userId)
                 .orElse(RefreshTokenEntity.builder()
-                        .user(userEntity)
+                		.userId(userId)
+                        .expiredAt(LocalDateTime.now())
                         .build());
         refreshTokenEntity.updateRefreshToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
