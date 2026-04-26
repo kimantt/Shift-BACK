@@ -1,5 +1,6 @@
 package com.project.shift.user.service;
 
+import com.project.shift.auth.repository.RefreshTokenRepository;
 import com.project.shift.chat.dao.ChatroomUserDAO;
 import com.project.shift.chat.dao.FriendDAO;
 import com.project.shift.global.exception.detail.user.UserConflictException;
@@ -42,6 +43,7 @@ public class UserService {
     private final ChatroomUserDAO chatroomUserDAO;
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public Long join(RegisterUserRequestDTO userDTO) {
@@ -211,7 +213,7 @@ public class UserService {
         String discardedPassword = passwordEncoder.encode(UUID.randomUUID().toString());
         user.withdraw(deletedLoginId, discardedPassword, LocalDateTime.now());
 
-        userRepository.save(user);
+        refreshTokenRepository.deleteById(userId);
 
         // SecurityContext 초기화 (로그아웃 처리)
         SecurityContextHolder.clearContext();
