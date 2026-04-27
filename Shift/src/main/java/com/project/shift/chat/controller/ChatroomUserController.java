@@ -1,11 +1,8 @@
 package com.project.shift.chat.controller;
 
-import java.util.Optional;
+import static com.project.shift.global.security.CurrentUser.getUserIdOrNull;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +15,8 @@ import com.project.shift.chat.dto.request.DeletedChatroomUserInfoDTO;
 import com.project.shift.chat.dto.response.ChatroomListDTO;
 import com.project.shift.chat.dto.response.ChatroomUserDTO;
 import com.project.shift.chat.service.ChatroomUserService;
+import com.project.shift.user.dto.response.MessageResponseDTO;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,64 +28,27 @@ public class ChatroomUserController {
 	
 	// 특정 두 유저가 참여한 채팅방 정보 확인 및 반환
 	@GetMapping("/receiver/{receiverId}")
-	public ResponseEntity<?> getChatroomWithReceiver(HttpServletRequest request, @PathVariable long receiverId) {
-		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	        Long userId = Long.parseLong(auth.getName());
-			Optional<ChatroomUserDTO> chatroomUserDTO = chatroomUserService.getChatroomWithReceiver(userId, receiverId);
-			if (chatroomUserDTO.isEmpty()) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND)
-		               .body("Chatroom not found");
-			} else {
-				return ResponseEntity.ok(chatroomUserDTO);
-			}
-		} catch (Exception e) {
-			   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-			                        .body("Error searching chatroom: " + e.getMessage());
-		}
-	}
-	
+	public ResponseEntity<ChatroomUserDTO> getChatroomWithReceiver(@PathVariable long receiverId) {
+        return ResponseEntity.ok(chatroomUserService.getChatroomWithReceiver(getUserIdOrNull(), receiverId));
+    }
 	
 	// CHATROOM-08 : 특정 채팅방 정보 반환
 	@GetMapping("/{chatroomUserId}")
-	public ResponseEntity<?> getChatroomListView(@PathVariable long chatroomUserId){
-		try {
-			Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-	        Long userId = Long.parseLong(auth.getName());
-			Optional<ChatroomListDTO> chatroomDTO = chatroomUserService.getChatroomListView(chatroomUserId, userId);
-			if (chatroomDTO.isEmpty()) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Chatroom not found");
-	        } else {
-				return ResponseEntity.ok(chatroomDTO);
-	        }
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                             .body("Error searching chatroom: " + e.getMessage());
-	    }
-	}
+	public ResponseEntity<ChatroomListDTO> getChatroomListView(@PathVariable long chatroomUserId) {
+        return ResponseEntity.ok(chatroomUserService.getChatroomListView(chatroomUserId, getUserIdOrNull()));
+    }
 	
 	// 채팅방 생성 시 두 사용자간 삭제된 채팅방 복구
 	@PostMapping("/restore")
-	public void restoreChatroomBetweenUsers(@RequestBody DeletedChatroomUserInfoDTO dto){
-		chatroomUserService.restoreChatroomBetweenUsers(dto);
-	}
+	public ResponseEntity<MessageResponseDTO> restoreChatroomBetweenUsers(@RequestBody DeletedChatroomUserInfoDTO dto) {
+        chatroomUserService.restoreChatroomBetweenUsers(dto);
+        return ResponseEntity.ok(new MessageResponseDTO("삭제된 채팅방이 복구되었습니다."));
+    }
 	
 	// 채팅방 이름 변경
 	@PatchMapping("/chatroom-name")
-	public ResponseEntity<?> updateChatroomName(@RequestBody ChatroomUserDTO dto) {
-		try {
-			int updated = chatroomUserService.updateChatroomName(dto);
-			if (updated > 0) {
-				return ResponseEntity.ok("Chatroom name successfully updated!");
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND)
-		               .body("Chatroom not found");
-			}
-		} catch (Exception e) {
-			   return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                       .body("Error updating chatroom name: " + e.getMessage());
-		}
-	}
-
+	public ResponseEntity<MessageResponseDTO> updateChatroomName(@RequestBody ChatroomUserDTO dto) {
+        chatroomUserService.updateChatroomName(dto);
+        return ResponseEntity.ok(new MessageResponseDTO("채팅방 이름이 변경되었습니다."));
+    }
 }

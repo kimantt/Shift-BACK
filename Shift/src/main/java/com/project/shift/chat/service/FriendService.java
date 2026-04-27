@@ -9,6 +9,7 @@ import com.project.shift.chat.dto.request.FriendDTO;
 import com.project.shift.chat.dto.response.FriendInfoDTO;
 import com.project.shift.chat.entity.FriendEntity;
 import com.project.shift.chat.repository.FriendRepository;
+import com.project.shift.global.exception.detail.user.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,24 +20,20 @@ public class FriendService {
 	private final FriendRepository friendRepository;
 	
 	@Transactional(readOnly = true)
-	public List<FriendInfoDTO> getUserFriends(long userId){
-		return friendRepository.getFriendsList(userId);
-	}
+	public List<FriendInfoDTO> getUserFriends(long userId) {
+        return friendRepository.getFriendsList(userId);
+    }
 	
 	@Transactional
 	public void addFriendship(FriendDTO dto) {
-		friendRepository.save(FriendEntity.toEntity(dto));
-		return;
-	}
+        friendRepository.save(FriendEntity.toEntity(dto));
+    }
 	
 	@Transactional
-	public boolean deleteFriend(long friendshipId) {
-		// 삭제된 행이 있으면 true 반환
-		if (friendRepository.existsById(friendshipId)) {
-			friendRepository.deleteById(friendshipId);
-			return true;
-		}
-		return false;
-	}
-
+	public void deleteFriend(long friendshipId) {
+        if (!friendRepository.existsById(friendshipId)) {
+            throw new UserNotFoundException("친구 관계를 찾을 수 없습니다.");
+        }
+        friendRepository.deleteById(friendshipId);
+    }
 }

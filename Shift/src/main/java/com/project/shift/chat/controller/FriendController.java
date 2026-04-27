@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.shift.chat.dto.request.FriendDTO;
 import com.project.shift.chat.dto.response.FriendInfoDTO;
 import com.project.shift.chat.service.FriendService;
+import com.project.shift.user.dto.response.MessageResponseDTO;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/friends")
 public class FriendController {
@@ -27,22 +26,21 @@ public class FriendController {
 	
 	// 친구 목록 조회
 	@GetMapping("/users/{userId}")
-	public List<FriendInfoDTO> getFriendList(@PathVariable long userId){
-		return friendService.getUserFriends(userId);
-	}
+	public List<FriendInfoDTO> getFriendList(@PathVariable long userId) {
+        return friendService.getUserFriends(userId);
+    }
 	
 	// 친구 추가
 	@PostMapping
-	public void addFriendship(@RequestBody FriendDTO friendInfo) {
-		friendService.addFriendship(friendInfo);
-		return;
-	}
+	public MessageResponseDTO addFriendship(@RequestBody FriendDTO friendInfo) {
+        friendService.addFriendship(friendInfo);
+        return new MessageResponseDTO("친구가 추가되었습니다.");
+    }
 	
 	// 친구 삭제
 	@DeleteMapping("/{friendshipId}")
-	public void deleteFriend(@PathVariable long friendshipId) {
-		// 친구 삭제
-		friendService.deleteFriend(friendshipId);
-	}
-	
+	public MessageResponseDTO deleteFriend(@PathVariable long friendshipId) {
+        friendService.deleteFriend(friendshipId);
+        return new MessageResponseDTO("친구가 삭제되었습니다.");
+    }
 }

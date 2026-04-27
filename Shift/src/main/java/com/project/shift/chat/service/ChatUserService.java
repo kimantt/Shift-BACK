@@ -1,7 +1,5 @@
 package com.project.shift.chat.service;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,43 +53,41 @@ public class ChatUserService {
 //    }
 	
 	@Transactional(readOnly = true)
-	public ChatUserSearchResultDTO searchUserByPhone(long userId, String phone) {
-		UserEntity entity = chatUserRepository.findByPhoneFlexible(phone);
-		if (entity == null) {
-	        throw new UserNotFoundException("해당 전화번호의 사용자를 찾을 수 없습니다.");
-		}
-		// 검색된 사용자와의 친구여부 포함하여 반환
-		long friendId = entity.getUserId();
-		boolean ifFriend = friendRepository.existsByUserIdAndFriendId(userId, friendId);
-		
-		return ChatUserSearchResultDTO.builder()
-				.ifFriend(ifFriend)
-				.userId(entity.getUserId())
-				.loginId(entity.getLoginId())
-				.name(entity.getName())
-				.phone(entity.getPhone())
-				.build();
-	}
+    public ChatUserSearchResultDTO searchUserByPhone(long userId, String phone) {
+        UserEntity entity = chatUserRepository.findByPhoneFlexible(phone);
+        if (entity == null) {
+            throw new UserNotFoundException("해당 전화번호의 사용자를 찾을 수 없습니다.");
+        }
+
+        // 검색된 사용자와의 친구여부 포함하여 반환
+        boolean ifFriend = friendRepository.existsByUserIdAndFriendId(userId, entity.getUserId());
+
+        return ChatUserSearchResultDTO.builder()
+                .ifFriend(ifFriend)
+                .userId(entity.getUserId())
+                .loginId(entity.getLoginId())
+                .name(entity.getName())
+                .phone(entity.getPhone())
+                .build();
+    }
 	
 	@Transactional(readOnly = true)
-	public Optional<ChatUserMyPageInfoDTO> getChatUserInfo(long userId) {
-		Optional<UserEntity> entity = chatUserRepository.findById(userId);
-		if (!entity.isEmpty()) {
-			UserEntity e = entity.get();
-			return Optional.of(ChatUserMyPageInfoDTO.builder()
-					.id(e.getLoginId())
-					.name(e.getName())
-					.phone(e.getPhone())
-					.build());
-		}
-		return Optional.empty();
-	}
+    public ChatUserMyPageInfoDTO getChatUserInfo(long userId) {
+        UserEntity userEntity = chatUserRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+        return ChatUserMyPageInfoDTO.builder()
+                .id(userEntity.getLoginId())
+                .name(userEntity.getName())
+                .phone(userEntity.getPhone())
+                .build();
+    }
 	
 	// 프로필 이미지 업로드
 	@Transactional
 	public void uploadProfileImage(long userId, MultipartFile file) {
 //	    if (file == null || file.isEmpty()) {
-//	        throw new IllegalArgumentException("업로드할 파일이 없습니다.");
+//	        throw new UserValidationException("업로드할 파일이 없습니다.");
 //	    }
 //
 //	    String key = "user_profile/" + userId + ".png";
@@ -112,7 +108,7 @@ public class ChatUserService {
 //	    } catch (Exception e) {
 //	        throw new RuntimeException("S3 업로드 실패", e);
 //	    }
-		throw new RuntimeException("S3 업로드 실패");
+		throw new UnsupportedOperationException("프로필 이미지 업로드 기능 미구현");
 	}
 	
 }

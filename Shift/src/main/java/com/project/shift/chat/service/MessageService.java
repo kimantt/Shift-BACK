@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,6 +21,7 @@ import com.project.shift.chat.repository.ChatUserRepository;
 import com.project.shift.chat.repository.ChatroomRepository;
 import com.project.shift.chat.repository.ChatroomUserRepository;
 import com.project.shift.chat.repository.MessageRepository;
+import com.project.shift.global.exception.detail.user.UserNotFoundException;
 import com.project.shift.user.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -66,13 +66,14 @@ public class MessageService {
 			chatroomUserDTO.setLastConnectionTime(now);
 			
 			long receiverId = chatroomUserRepository.getReceiverId(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId()).getFirst();
-			Optional<UserEntity> receiverInfo = chatUserRepository.findById(receiverId);
+			UserEntity receiverInfo = chatUserRepository.findById(receiverId)
+					.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 			
 			chatroomUserRepository.restoreChatroomUser(chatroomUserDTO.getChatroomId(),
 												chatroomUserDTO.getUserId(),
 												"OF",
 												now,
-												receiverInfo.get().getName() + "님과의 채팅방");
+												receiverInfo.getName() + "님과의 채팅방");
 		}
 		
 		// 채팅방을 완전히 처음 생성해서 메시지를 보내는 경우 메시지 전송 시간이 채팅방 생성시간과 동일하게 설정되어있음
@@ -189,7 +190,9 @@ public class MessageService {
 		// 상대방이 채팅방을 삭제한 상태인지 확인
 		boolean ifDeleted = checkReceiverConnectionStatus(chatroomId, userId);
 		if (ifDeleted) {
-			String newChatroomName = chatUserRepository.findById(userId).get().getName() + "님과의 채팅방";
+			String newChatroomName = chatUserRepository.findById(userId)
+					.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
+					.getName() + "님과의 채팅방";
 			
 			// 삭제했다면 채팅방 접속상태 'OF'로 변경
 			updateReceiverConnectionStatus(chatroomId, userId, newChatroomName, now);
