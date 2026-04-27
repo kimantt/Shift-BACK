@@ -12,10 +12,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dao.ChatUserDAO;
-import com.project.shift.chat.dao.ChatroomDAO;
-import com.project.shift.chat.dao.ChatroomUserDAO;
-import com.project.shift.chat.dao.MessageDAO;
 import com.project.shift.chat.dto.ChatroomDTO;
 import com.project.shift.chat.dto.ChatroomListDTO;
 import com.project.shift.chat.dto.ChatroomUserDTO;
@@ -23,6 +19,10 @@ import com.project.shift.chat.dto.MessageDTO;
 import com.project.shift.chat.dto.MessageUserDTO;
 import com.project.shift.chat.entity.ChatUserEntity;
 import com.project.shift.chat.entity.MessageEntity;
+import com.project.shift.chat.repository.ChatUserRepository;
+import com.project.shift.chat.repository.ChatroomRepository;
+import com.project.shift.chat.repository.ChatroomUserRepository;
+import com.project.shift.chat.repository.MessageRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,16 +32,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MessageService {
 	
-	private final MessageDAO messageDAO;
-	private final ChatroomUserDAO chatroomUserDAO;
-	private final ChatroomDAO chatroomDAO;
-	private final ChatUserDAO chatUserDAO;
+	private final MessageRepository messageRepository;
+	private final ChatroomUserRepository chatroomUserRepository;
+	private final ChatroomRepository chatroomRepository;
+	private final ChatUserRepository chatUserRepository;
 	private final SimpMessagingTemplate messagingTemplate;
 
 	// 메시지 DB 저장
 	@Transactional
 	public void addMessage(MessageDTO message) {
-		messageDAO.saveMessage(MessageEntity.toEntity(message));
+		messageRepository.save(MessageEntity.toEntity(message));
 	}
 	
 	// 채팅방 최초 접속 시간 이후 모든 채팅방 메시지 반환
@@ -49,7 +49,7 @@ public class MessageService {
 	public List<MessageDTO> getMessageHistory(ChatroomListDTO dto){
 		long chatroomId = dto.getChatroomId();
 		Date createdDateTime = dto.getCreatedTime();
-		List<MessageEntity> entityList = messageDAO.getMessageHistory(chatroomId, createdDateTime);
+		List<MessageEntity> entityList = messageRepository.findByChatroomId(chatroomId, createdDateTime);
 		List<MessageDTO> dtoList = new ArrayList<MessageDTO>();
 		for (MessageEntity e : entityList) {
 			dtoList.add(MessageDTO.toDto(e));
@@ -65,10 +65,10 @@ public class MessageService {
 			Date now = new Date();
 			chatroomUserDTO.setLastConnectionTime(now);
 			
-			long receiverId = chatroomUserDAO.getReceiverId(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId()).getFirst();
-			Optional<ChatUserEntity> receiverInfo = chatUserDAO.getChatUserInfo(receiverId);
+			long receiverId = chatroomUserRepository.getReceiverId(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId()).getFirst();
+			Optional<ChatUserEntity> receiverInfo = chatUserRepository.findById(receiverId);
 			
-			chatroomUserDAO.restoreChatroomUser(chatroomUserDTO.getChatroomId(),
+			chatroomUserRepository.restoreChatroomUser(chatroomUserDTO.getChatroomId(),
 												chatroomUserDTO.getUserId(),
 												"OF",
 												now,
@@ -87,24 +87,28 @@ public class MessageService {
 	        	// 접속 상태 ON으로 세팅
 	        	chatroomUserDTO.setConnectionStatus("ON");
 	        	// 채팅방 마지막 접속 시간 이후 모든 메시지 읽음 처리
-	        	messageDAO.markMessagesAsRead(messageDTO.getChatroomId(),
+	        	messageRepository.markMessagesAsRead(messageDTO.getChatroomId(),
 	        								  chatroomUserDTO.getLastConnectionTime(),
 	        								  chatroomUserDTO.getUserId());
 	        	chatroomUserDTO.setLastConnectionTime(new Date());
-	        	chatroomUserDAO.updateChatUserInfo(chatroomUserDTO);
+	        	chatroomUserRepository.updateChatUserInfo(chatroomUserDTO.getConnectionStatus(),
+	        			chatroomUserDTO.getLastConnectionTime(),
+	        			chatroomUserDTO.getChatroomUserId());
 	            break;	
 	        case LEAVE :
 	            // 접속 상태 OF로 세팅
 	        	chatroomUserDTO.setConnectionStatus("OF");
 	        	// 채팅방 마지막 접속 시간을 현재 시간으로 변경
 	        	chatroomUserDTO.setLastConnectionTime(new Date());
-	        	chatroomUserDAO.updateChatUserInfo(chatroomUserDTO);
+	        	chatroomUserRepository.updateChatUserInfo(chatroomUserDTO.getConnectionStatus(),
+	        			chatroomUserDTO.getLastConnectionTime(),
+	        			chatroomUserDTO.getChatroomUserId());
 	            break;
 			case CHAT :
 				// 현재 채팅방에 온라인 상태인 유저의 수를 구해서 메시지의 unreadCount를 세팅
 				setUnreadCount(messageDTO, chatroomUserDTO);
 	        	// 메시지를 DB에 저장
-	        	messageDAO.saveMessage(MessageEntity.toEntity(messageDTO));
+	        	messageRepository.save(MessageEntity.toEntity(messageDTO));
 	        	// 채팅방의 마지막 메시지와 시간을 업데이트
 	        	updateChatroomInfo(messageDTO, chatroomUserDTO);
 	        	// 받는 사람들에게 메시지가 왔다고 브로드캐스팅 (채팅방 목록 실시간 갱신용)
@@ -120,28 +124,28 @@ public class MessageService {
 	
 	// 채팅방의 마지막 메시지와 시간을 업데이트
 	private void updateChatroomInfo(MessageDTO messageDTO, ChatroomUserDTO chatroomUserDTO) {
-		chatroomDAO.findChatroomById(chatroomUserDTO.getChatroomId())
+		chatroomRepository.findById(chatroomUserDTO.getChatroomId())
 				   .ifPresent(chatroom -> {
 					   ChatroomDTO dto = ChatroomDTO.toDto(chatroom);
-					   chatroomDAO.updateLastMsgAndDate(dto.getChatroomId(), messageDTO.getContent(), messageDTO.getSendDate());
+					   chatroomRepository.updateLastMsgAndDate(dto.getChatroomId(), messageDTO.getContent(), messageDTO.getSendDate());
 				   });
 	}
 	
 	// 현재 채팅방에 온라인 상태인 유저의 수를 구해서 메시지의 unreadCount를 세팅
 	private void setUnreadCount(MessageDTO messageDTO, ChatroomUserDTO chatroomUserDTO) {
-		int unreadCount = Math.max(messageDTO.getUnreadCount() - chatroomUserDAO.countOtherUsersOnline(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId()), 0);
+		int unreadCount = Math.max(messageDTO.getUnreadCount() - chatroomUserRepository.countOtherUsersOnline(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId()), 0);
 		messageDTO.setUnreadCount(unreadCount);
 	}
 	
 	// 받는 사람들에게 메시지가 왔다고 브로드캐스팅 (채팅방 목록 실시간 갱신용)
 	private void broadcastToChatUser(ChatroomUserDTO chatroomUserDTO) {
 		try {
-			List<Long> receiverIds = chatroomUserDAO.getReceiverId(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId());
+			List<Long> receiverIds = chatroomUserRepository.getReceiverId(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId());
 			for (Long receiverId : receiverIds) {
 				Map<String, Object> data = new HashMap<>();
 				data.put("chatroomId", chatroomUserDTO.getChatroomId());
-				data.put("unreadCount", chatroomDAO.countUnreadMessages(chatroomUserDTO.getChatroomId(), receiverId));
-				chatroomUserDAO.getChatroomUser(chatroomUserDTO.getChatroomId(), receiverId)
+				data.put("unreadCount", messageRepository.countUnreadMessages(chatroomUserDTO.getChatroomId(), receiverId));
+				chatroomUserRepository.getChatroomUser(chatroomUserDTO.getChatroomId(), receiverId)
 				.ifPresent(chatroomUserEntity -> data.put("chatroomUserId", chatroomUserEntity.getChatroomUserId()));
 				
 				messagingTemplate.convertAndSend("/sub/chatroom-list/" + receiverId, data);
@@ -185,7 +189,7 @@ public class MessageService {
 		// 상대방이 채팅방을 삭제한 상태인지 확인
 		boolean ifDeleted = checkReceiverConnectionStatus(chatroomId, userId);
 		if (ifDeleted) {
-			String newChatroomName = chatUserDAO.getChatUserInfo(userId).get().getName() + "님과의 채팅방";
+			String newChatroomName = chatUserRepository.findById(userId).get().getName() + "님과의 채팅방";
 			
 			// 삭제했다면 채팅방 접속상태 'OF'로 변경
 			updateReceiverConnectionStatus(chatroomId, userId, newChatroomName, now);
@@ -195,13 +199,13 @@ public class MessageService {
 	// 상대방의 채팅방 connectionStatus가 'DL'인지 확인
 	@Transactional(readOnly = true)
 	private boolean checkReceiverConnectionStatus(long chatroomId, long userId) {
-		return chatroomUserDAO.checkIfChatroomDeleted(chatroomId, userId);
+		return chatroomUserRepository.checkIfChatroomDeleted(chatroomId, userId) > 0;
 	}
 	
 	// 상대방의 채팅방 접속 상태를 'DL'에서 'OF'로 변경
 	@Transactional
 	private void updateReceiverConnectionStatus(long chatroomId, long userId, String newChatroomName, Date now) {
-		chatroomUserDAO.updateReceiverConnectionStatus(chatroomId, userId, newChatroomName, now);
+		chatroomUserRepository.updateReceiverConnectionStatus(chatroomId, userId, newChatroomName, now);
 	}
 
 }

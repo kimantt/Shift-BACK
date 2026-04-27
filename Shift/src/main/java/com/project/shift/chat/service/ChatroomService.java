@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dao.ChatroomDAO;
 import com.project.shift.chat.dto.ChatroomDTO;
 import com.project.shift.chat.dto.ChatroomListDTO;
 import com.project.shift.chat.dto.ChatroomListProjection;
@@ -15,6 +14,8 @@ import com.project.shift.chat.dto.MessageSearchResultDTO;
 import com.project.shift.chat.dto.MessageSearchResultProjection;
 import com.project.shift.chat.dto.MessageWithSenderDTO;
 import com.project.shift.chat.entity.ChatroomEntity;
+import com.project.shift.chat.repository.ChatroomRepository;
+import com.project.shift.chat.repository.MessageRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,34 +23,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ChatroomService {
 
-	private final ChatroomDAO dao;
+	private final ChatroomRepository chatroomRepository;
+	private final MessageRepository messageRepository;
 	private final ChatroomUserService chatroomUserService;
 	
 	// 특정 채팅방 정보 반환
 	@Transactional(readOnly = true)
 	public Optional<ChatroomDTO> getChatroom(long chatroomId) {
-		return dao.findChatroomById(chatroomId)
+		return chatroomRepository.findById(chatroomId)
 	              .map(ChatroomDTO::toDto);
 	}
 	
 	// 채팅방 검색 - 1. 검색 키워드가 참여한 채팅 목록의 상대방 이름에 포함될 때
 	@Transactional(readOnly = true)
 	public List<ChatroomListDTO> searchChatroomUsersName(String input, long userId) {
-		List<ChatroomListProjection> chatroomList = dao.searchChatroomUsersName(input, userId);
+		List<ChatroomListProjection> chatroomList = chatroomRepository.findChatroomUsersBySearchInput(input, userId);
 		return chatroomListDTOBuilder(chatroomList, userId);
 	}
 	
 	// 채팅 검색 - 채팅 메시지 검색
 	@Transactional(readOnly = true)
 	public List<MessageSearchResultDTO> searchChatroomMessages(String input, long userId){
-		List<MessageSearchResultProjection> chatroomList = dao.searchChatroomMessages(input, userId);
+		List<MessageSearchResultProjection> chatroomList = chatroomRepository.findChatroomMessagesBySearchInput(input, userId);
 		return MessageSearchResultDTOBuilder(chatroomList, userId);
 	}
 		
 	// 사용자가 참여한 채팅방 목록 반환
 	@Transactional(readOnly = true)
 	public List<ChatroomListDTO> getUserChatrooms(long userId){
-		List<ChatroomListProjection> chatroomList = dao.getUserChatrooms(userId);
+		List<ChatroomListProjection> chatroomList = chatroomRepository.findChatroomsByUserId(userId);
 		return chatroomListDTOBuilder(chatroomList, userId);
 	}
 	
@@ -68,7 +70,7 @@ public class ChatroomService {
 				
 		// 저장 후 DB에서 생성된 PK 가져오기
 		ChatroomEntity entity = ChatroomEntity.toEntity(newChatroom);
-	    ChatroomEntity savedEntity = dao.saveChatroom(entity);
+	    ChatroomEntity savedEntity = chatroomRepository.save(entity);
 	    
 	    return savedEntity.getChatroomId();
 	}
@@ -78,7 +80,11 @@ public class ChatroomService {
 	@Transactional
 	public boolean deleteChatroomAndChatroomUsers(long chatroomId) {
 		// Chatroom 초기화
-		boolean ifChatroomDeleted = dao.initChatroomExceptKey(chatroomId);
+		boolean ifChatroomDeleted = false;
+		if (chatroomRepository.existsById(chatroomId)) {
+			chatroomRepository.initChatroomExceptKey(chatroomId);
+			ifChatroomDeleted = true;
+		}
 		if (ifChatroomDeleted) {
 			// ChatroomUsers 초기화
 			return chatroomUserService.deleteAllChatroomUsers(chatroomId);
@@ -113,7 +119,7 @@ public class ChatroomService {
                 .receiverName(p.getReceiverName())
                 .build();
             // unreadCount 계산
-            dto.setUnreadCount(dao.countUnreadMessages(p.getChatroomId(), userId));
+            dto.setUnreadCount(messageRepository.countUnreadMessages(p.getChatroomId(), userId));
             
             return dto;
         }).toList();
@@ -135,7 +141,7 @@ public class ChatroomService {
                 .receiverId(p.getReceiverId())
                 .build();
            // unreadCount 계산
-           dto.setUnreadCount(dao.countUnreadMessages(p.getChatroomId(), userId));
+           dto.setUnreadCount(messageRepository.countUnreadMessages(p.getChatroomId(), userId));
            return dto;
      }).toList();
 	}

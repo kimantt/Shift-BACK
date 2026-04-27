@@ -15,6 +15,9 @@ import com.project.shift.chat.entity.ChatroomUserEntity;
 
 public interface ChatroomUserRepository extends JpaRepository<ChatroomUserEntity, Long>{
 
+	// 특정 채팅방 ID에 연결된 채팅방 사용자 정보 존재 여부 확인
+	boolean existsByChatroomId(long chatroomId);
+	
 	// 사용자 채팅방 접속 정보 수정
 	@Modifying
 	@Transactional

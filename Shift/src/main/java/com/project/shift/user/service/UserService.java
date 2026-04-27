@@ -1,8 +1,8 @@
 package com.project.shift.user.service;
 
 import com.project.shift.auth.repository.RefreshTokenRepository;
-import com.project.shift.chat.dao.ChatroomUserDAO;
-import com.project.shift.chat.dao.FriendDAO;
+import com.project.shift.chat.repository.ChatroomUserRepository;
+import com.project.shift.chat.repository.FriendRepository;
 import com.project.shift.global.exception.detail.user.UserConflictException;
 import com.project.shift.global.exception.detail.user.UserNotFoundException;
 import com.project.shift.global.exception.detail.user.UserValidationException;
@@ -39,8 +39,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CartDAO cartDAO;
-    private final FriendDAO friendDAO;
-    private final ChatroomUserDAO chatroomUserDAO;
+    private final FriendRepository friendRepository;
+    private final ChatroomUserRepository chatroomUserRepository;
     private final OrderRepository orderRepository;
     private final DeliveryRepository deliveryRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -202,8 +202,8 @@ public class UserService {
         }
 
         cartDAO.clearCartByUserId(userId); // 장바구니 비우기
-        friendDAO.deleteAllFriends(userId); // 친구 관계 삭제
-        chatroomUserDAO.deleteChatroomUsersByUserId(userId);
+        friendRepository.deleteFriendship(userId); // 친구 관계 삭제
+        chatroomUserRepository.updateStatusToDeletedByUserId(userId);
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));

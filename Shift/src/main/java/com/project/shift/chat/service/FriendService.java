@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dao.FriendDAO;
 import com.project.shift.chat.dto.FriendDTO;
 import com.project.shift.chat.dto.FriendInfoDTO;
 import com.project.shift.chat.entity.FriendEntity;
+import com.project.shift.chat.repository.FriendRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,23 +16,27 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FriendService {
 
-	private final FriendDAO dao;
+	private final FriendRepository friendRepository;
 	
 	@Transactional(readOnly = true)
 	public List<FriendInfoDTO> getUserFriends(long userId){
-		return dao.getUserFriends(userId);
+		return friendRepository.getFriendsList(userId);
 	}
 	
 	@Transactional
 	public void addFriendship(FriendDTO dto) {
-		dao.saveFriendship(FriendEntity.toEntity(dto));
+		friendRepository.save(FriendEntity.toEntity(dto));
 		return;
 	}
 	
 	@Transactional
 	public boolean deleteFriend(long friendshipId) {
 		// 삭제된 행이 있으면 true 반환
-		return dao.deleteFriend(friendshipId);
+		if (friendRepository.existsById(friendshipId)) {
+			friendRepository.deleteById(friendshipId);
+			return true;
+		}
+		return false;
 	}
 
 }
