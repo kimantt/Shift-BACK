@@ -18,7 +18,7 @@ import com.project.shift.chat.dao.FriendDAO;
 import com.project.shift.chat.dto.ChatUserMyPageInfoDTO;
 import com.project.shift.chat.dto.ChatUserSearchResultDTO;
 import com.project.shift.chat.entity.ChatUserEntity;
-import com.project.shift.chat.exception.UserNotFoundException;
+import com.project.shift.global.exception.detail.user.UserNotFoundException;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

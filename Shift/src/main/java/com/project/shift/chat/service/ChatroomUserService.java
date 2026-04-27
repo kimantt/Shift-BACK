@@ -16,7 +16,7 @@ import com.project.shift.chat.dto.ChatroomUserDTO;
 import com.project.shift.chat.dto.DeletedChatroomUserInfoDTO;
 import com.project.shift.chat.dto.MessageWithSenderDTO;
 import com.project.shift.chat.entity.ChatroomUserEntity;
-import com.project.shift.chat.exception.UserNotFoundException;
+import com.project.shift.global.exception.detail.user.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 

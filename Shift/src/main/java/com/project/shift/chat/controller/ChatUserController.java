@@ -16,9 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.project.shift.chat.dto.ChatUserMyPageInfoDTO;
 import com.project.shift.chat.dto.ChatroomUserDTO;
-import com.project.shift.chat.exception.UserNotFoundException;
 import com.project.shift.chat.service.ChatUserService;
 import com.project.shift.chat.service.ChatroomUserService;
+import com.project.shift.global.exception.detail.user.UserNotFoundException;
 import com.project.shift.global.jwt.JwtService;
 
 import jakarta.servlet.http.HttpServletRequest;
