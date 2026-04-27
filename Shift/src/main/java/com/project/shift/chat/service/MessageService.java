@@ -17,12 +17,12 @@ import com.project.shift.chat.dto.response.ChatroomDTO;
 import com.project.shift.chat.dto.response.ChatroomListDTO;
 import com.project.shift.chat.dto.response.ChatroomUserDTO;
 import com.project.shift.chat.dto.response.MessageDTO;
-import com.project.shift.chat.entity.ChatUserEntity;
 import com.project.shift.chat.entity.MessageEntity;
 import com.project.shift.chat.repository.ChatUserRepository;
 import com.project.shift.chat.repository.ChatroomRepository;
 import com.project.shift.chat.repository.ChatroomUserRepository;
 import com.project.shift.chat.repository.MessageRepository;
+import com.project.shift.user.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class MessageService {
 			chatroomUserDTO.setLastConnectionTime(now);
 			
 			long receiverId = chatroomUserRepository.getReceiverId(chatroomUserDTO.getChatroomId(), chatroomUserDTO.getUserId()).getFirst();
-			Optional<ChatUserEntity> receiverInfo = chatUserRepository.findById(receiverId);
+			Optional<UserEntity> receiverInfo = chatUserRepository.findById(receiverId);
 			
 			chatroomUserRepository.restoreChatroomUser(chatroomUserDTO.getChatroomId(),
 												chatroomUserDTO.getUserId(),

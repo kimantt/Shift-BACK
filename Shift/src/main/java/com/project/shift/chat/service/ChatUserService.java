@@ -15,10 +15,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import com.project.shift.chat.dto.response.ChatUserMyPageInfoDTO;
 import com.project.shift.chat.dto.response.ChatUserSearchResultDTO;
-import com.project.shift.chat.entity.ChatUserEntity;
 import com.project.shift.chat.repository.ChatUserRepository;
 import com.project.shift.chat.repository.FriendRepository;
 import com.project.shift.global.exception.detail.user.UserNotFoundException;
+import com.project.shift.user.entity.UserEntity;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +56,7 @@ public class ChatUserService {
 	
 	@Transactional(readOnly = true)
 	public ChatUserSearchResultDTO searchUserByPhone(long userId, String phone) {
-		ChatUserEntity entity = chatUserRepository.findByPhoneFlexible(phone);
+		UserEntity entity = chatUserRepository.findByPhoneFlexible(phone);
 		if (entity == null) {
 	        throw new UserNotFoundException("해당 전화번호의 사용자를 찾을 수 없습니다.");
 		}
@@ -75,9 +75,9 @@ public class ChatUserService {
 	
 	@Transactional(readOnly = true)
 	public Optional<ChatUserMyPageInfoDTO> getChatUserInfo(long userId) {
-		Optional<ChatUserEntity> entity = chatUserRepository.findById(userId);
+		Optional<UserEntity> entity = chatUserRepository.findById(userId);
 		if (!entity.isEmpty()) {
-			ChatUserEntity e = entity.get();
+			UserEntity e = entity.get();
 			return Optional.of(ChatUserMyPageInfoDTO.builder()
 					.id(e.getLoginId())
 					.name(e.getName())
