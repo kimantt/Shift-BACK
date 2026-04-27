@@ -13,8 +13,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import com.project.shift.chat.dto.ChatUserMyPageInfoDTO;
-import com.project.shift.chat.dto.ChatUserSearchResultDTO;
+import com.project.shift.chat.dto.response.ChatUserMyPageInfoDTO;
+import com.project.shift.chat.dto.response.ChatUserSearchResultDTO;
 import com.project.shift.chat.entity.ChatUserEntity;
 import com.project.shift.chat.repository.ChatUserRepository;
 import com.project.shift.chat.repository.FriendRepository;

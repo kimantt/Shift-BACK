@@ -7,12 +7,12 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dto.ChatroomDTO;
-import com.project.shift.chat.dto.ChatroomListDTO;
-import com.project.shift.chat.dto.ChatroomListProjection;
-import com.project.shift.chat.dto.MessageSearchResultDTO;
-import com.project.shift.chat.dto.MessageSearchResultProjection;
-import com.project.shift.chat.dto.MessageWithSenderDTO;
+import com.project.shift.chat.dto.request.MessageWithSenderDTO;
+import com.project.shift.chat.dto.response.ChatroomDTO;
+import com.project.shift.chat.dto.response.ChatroomListDTO;
+import com.project.shift.chat.dto.response.MessageSearchResultDTO;
+import com.project.shift.chat.dto.response.projection.ChatroomListProjection;
+import com.project.shift.chat.dto.response.projection.MessageSearchResultProjection;
 import com.project.shift.chat.entity.ChatroomEntity;
 import com.project.shift.chat.repository.ChatroomRepository;
 import com.project.shift.chat.repository.MessageRepository;

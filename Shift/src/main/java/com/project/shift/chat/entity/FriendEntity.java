@@ -1,6 +1,6 @@
 package com.project.shift.chat.entity;
 
-import com.project.shift.chat.dto.FriendDTO;
+import com.project.shift.chat.dto.request.FriendDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

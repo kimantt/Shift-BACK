@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.shift.chat.dto.ChatroomDTO;
-import com.project.shift.chat.dto.ChatroomListDTO;
-import com.project.shift.chat.dto.MessageSearchResultDTO;
-import com.project.shift.chat.dto.MessageWithSenderDTO;
+import com.project.shift.chat.dto.request.MessageWithSenderDTO;
+import com.project.shift.chat.dto.response.ChatroomDTO;
+import com.project.shift.chat.dto.response.ChatroomListDTO;
+import com.project.shift.chat.dto.response.MessageSearchResultDTO;
 import com.project.shift.chat.service.ChatroomService;
 import com.project.shift.chat.service.ChatroomUserService;
 import com.project.shift.chat.service.MessageService;

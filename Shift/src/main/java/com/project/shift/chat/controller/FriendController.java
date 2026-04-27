@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.shift.chat.dto.FriendDTO;
-import com.project.shift.chat.dto.FriendInfoDTO;
+import com.project.shift.chat.dto.request.FriendDTO;
+import com.project.shift.chat.dto.response.FriendInfoDTO;
 import com.project.shift.chat.service.FriendService;
 
 import lombok.RequiredArgsConstructor;

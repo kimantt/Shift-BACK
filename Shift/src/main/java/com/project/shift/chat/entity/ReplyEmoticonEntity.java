@@ -1,7 +1,5 @@
 package com.project.shift.chat.entity;
 
-import com.project.shift.chat.dto.ReplyEmoticonDTO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -43,15 +41,4 @@ public class ReplyEmoticonEntity {
     
     @Column(name = "TYPE", nullable = false, length = 3)
     private String type;
-    
-    // DTO -> Entity 변환
-    public static ReplyEmoticonEntity toEntity(ReplyEmoticonDTO dto) {
-        return ReplyEmoticonEntity.builder()
-                .replyEmoticonId(dto.getReplyEmoticonId())
-                .messageId(dto.getMessageId())
-                .userId(dto.getUserId())
-                .type(dto.getType())
-                .build();
-    }
-
 }

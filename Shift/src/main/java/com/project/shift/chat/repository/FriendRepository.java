@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.project.shift.chat.dto.FriendInfoDTO;
+import com.project.shift.chat.dto.response.FriendInfoDTO;
 import com.project.shift.chat.entity.FriendEntity;
 
 public interface FriendRepository extends JpaRepository<FriendEntity, Long>{

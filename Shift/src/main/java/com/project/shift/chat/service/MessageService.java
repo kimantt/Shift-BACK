@@ -12,11 +12,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dto.ChatroomDTO;
-import com.project.shift.chat.dto.ChatroomListDTO;
-import com.project.shift.chat.dto.ChatroomUserDTO;
-import com.project.shift.chat.dto.MessageDTO;
-import com.project.shift.chat.dto.MessageUserDTO;
+import com.project.shift.chat.dto.request.MessageUserDTO;
+import com.project.shift.chat.dto.response.ChatroomDTO;
+import com.project.shift.chat.dto.response.ChatroomListDTO;
+import com.project.shift.chat.dto.response.ChatroomUserDTO;
+import com.project.shift.chat.dto.response.MessageDTO;
 import com.project.shift.chat.entity.ChatUserEntity;
 import com.project.shift.chat.entity.MessageEntity;
 import com.project.shift.chat.repository.ChatUserRepository;

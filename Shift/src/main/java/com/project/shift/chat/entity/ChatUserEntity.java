@@ -4,8 +4,6 @@ import java.sql.Timestamp;
 
 import org.hibernate.annotations.SQLRestriction;
 
-import com.project.shift.chat.dto.ChatUserDTO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -63,19 +61,5 @@ public class ChatUserEntity {
     
     @Column(name = "DELETED_AT")
     private Timestamp deletedAt;
-    
-    // DTO -> Entity 변환
-    public static ChatUserEntity toEntity(ChatUserDTO dto) {
-        return ChatUserEntity.builder()
-                .userId(dto.getUserId())
-                .loginId(dto.getLoginId())
-                .password(dto.getPassword())
-                .name(dto.getName())
-                .phone(dto.getPhone())
-                .address(dto.getAddress())
-                .points(dto.getPoints())
-                .adminFlag(dto.getAdminFlag())
-                .build();
-    }
     
 }

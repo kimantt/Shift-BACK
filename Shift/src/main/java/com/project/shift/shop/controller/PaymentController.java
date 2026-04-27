@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.shift.chat.dto.MessageDTO;
-import com.project.shift.chat.dto.MessageWithSenderDTO;
+import com.project.shift.chat.dto.request.MessageWithSenderDTO;
+import com.project.shift.chat.dto.response.MessageDTO;
 import com.project.shift.chat.service.ChatroomService;
 import com.project.shift.chat.service.ChatroomUserService;
 import com.project.shift.chat.service.MessageService;

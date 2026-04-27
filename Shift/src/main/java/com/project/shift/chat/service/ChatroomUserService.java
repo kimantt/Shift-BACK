@@ -8,11 +8,11 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dto.ChatroomListDTO;
-import com.project.shift.chat.dto.ChatroomListProjection;
-import com.project.shift.chat.dto.ChatroomUserDTO;
-import com.project.shift.chat.dto.DeletedChatroomUserInfoDTO;
-import com.project.shift.chat.dto.MessageWithSenderDTO;
+import com.project.shift.chat.dto.request.DeletedChatroomUserInfoDTO;
+import com.project.shift.chat.dto.request.MessageWithSenderDTO;
+import com.project.shift.chat.dto.response.ChatroomListDTO;
+import com.project.shift.chat.dto.response.ChatroomUserDTO;
+import com.project.shift.chat.dto.response.projection.ChatroomListProjection;
 import com.project.shift.chat.entity.ChatroomUserEntity;
 import com.project.shift.chat.repository.ChatroomUserRepository;
 import com.project.shift.chat.repository.MessageRepository;

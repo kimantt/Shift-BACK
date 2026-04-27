@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dto.ChatroomListProjection;
-import com.project.shift.chat.dto.MessageSearchResultProjection;
+import com.project.shift.chat.dto.response.projection.ChatroomListProjection;
+import com.project.shift.chat.dto.response.projection.MessageSearchResultProjection;
 import com.project.shift.chat.entity.ChatroomEntity;
 
 public interface ChatroomRepository extends JpaRepository<ChatroomEntity, Long>{

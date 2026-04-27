@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.shift.chat.dto.ChatroomListDTO;
-import com.project.shift.chat.dto.MessageDTO;
-import com.project.shift.chat.dto.MessageUserDTO;
+import com.project.shift.chat.dto.request.MessageUserDTO;
+import com.project.shift.chat.dto.response.ChatroomListDTO;
+import com.project.shift.chat.dto.response.MessageDTO;
 import com.project.shift.chat.service.MessageService;
 
 import lombok.RequiredArgsConstructor;

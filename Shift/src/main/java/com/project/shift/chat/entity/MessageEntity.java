@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.project.shift.chat.dto.MessageDTO;
+import com.project.shift.chat.dto.response.MessageDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.project.shift.chat.dto.ChatroomUserDTO;
-import com.project.shift.chat.dto.MessageDTO;
+import com.project.shift.chat.dto.response.ChatroomUserDTO;
+import com.project.shift.chat.dto.response.MessageDTO;
 import com.project.shift.chat.service.ChatroomUserService;
 import com.project.shift.chat.service.MessageService;
 import com.project.shift.product.dao.IPointDAO;

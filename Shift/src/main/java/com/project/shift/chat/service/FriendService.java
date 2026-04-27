@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.shift.chat.dto.FriendDTO;
-import com.project.shift.chat.dto.FriendInfoDTO;
+import com.project.shift.chat.dto.request.FriendDTO;
+import com.project.shift.chat.dto.response.FriendInfoDTO;
 import com.project.shift.chat.entity.FriendEntity;
 import com.project.shift.chat.repository.FriendRepository;
 

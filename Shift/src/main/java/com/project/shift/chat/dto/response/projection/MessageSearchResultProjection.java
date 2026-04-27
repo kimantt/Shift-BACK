@@ -1,18 +1,17 @@
-package com.project.shift.chat.dto;
+package com.project.shift.chat.dto.response.projection;
 
-public interface ChatroomListProjection {
+public interface MessageSearchResultProjection {
+
 	Long getChatroomUserId();
     Long getChatroomId();
     String getChatroomName();
-    String getLastMsgContent();
 
-    Long getLastMsgSender();
-    java.sql.Timestamp getLastMsgDate();
     java.sql.Timestamp getLastConnectionTime();
     java.sql.Timestamp getCreatedTime();
 
     String getConnectionStatus();
     String getIsDarkMode();
+    String getMessage();
+    java.sql.Timestamp getSendDate();
     Long getReceiverId();
-    String getReceiverName();
 }
