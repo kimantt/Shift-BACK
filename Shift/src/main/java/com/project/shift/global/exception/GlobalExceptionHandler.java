@@ -41,6 +41,17 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 	
+	@ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpectedException(Exception exception,
+                                                   HttpServletRequest request) {
+        return createProblemDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unexpected Server Error",
+                "예기치 못한 오류가 발생했습니다.",
+                request
+        );
+    }
+	
 	private String formatFieldError(FieldError fieldError) {
         return fieldError.getField() + ": " + fieldError.getDefaultMessage();
     }
