@@ -131,10 +131,10 @@ public interface ChatroomUserRepository extends JpaRepository<ChatroomUserEntity
 	// 메시지가 전송됐다는 알림을 모든 수신자들에게 보내기 위한 함수 (실시간 채팅방 목록 관련)
 	@Query("""
 			SELECT r.user.userId
-			FROM ChatroomUserEntity u, ChatroomUserEntity r 
-			WHERE u.chatroom.chatroomId = r.chatroom.chatroomId 
-			AND u.user.userId = :userId
-			AND u.chatroom.chatroomId = :chatroomId 
+			FROM ChatroomUserEntity u
+			JOIN ChatroomUserEntity r ON u.chatroom.chatroomId = r.chatroom.chatroomId
+			WHERE u.user.userId = :userId
+			AND u.chatroom.chatroomId = :chatroomId
 			AND r.user.userId <> :userId
 			""")
 	List<Long> getReceiverId(@Param("chatroomId") long chatroomUserId, @Param("userId") long userId);
@@ -142,9 +142,9 @@ public interface ChatroomUserRepository extends JpaRepository<ChatroomUserEntity
 	// 현재 채팅방에서 나를 제외하고 접속 중인 사용자의 수를 반환
 	@Query("""
 		    SELECT COUNT(r)
-		    FROM ChatroomUserEntity u, ChatroomUserEntity r
-		    WHERE u.chatroom.chatroomId = r.chatroom.chatroomId
-		      AND u.user.userId = :userId
+		    FROM ChatroomUserEntity u
+		    JOIN ChatroomUserEntity r ON u.chatroom.chatroomId = r.chatroom.chatroomId
+		    WHERE u.user.userId = :userId
 		      AND u.chatroom.chatroomId = :chatroomId
 		      AND r.user.userId <> :userId
 			""")

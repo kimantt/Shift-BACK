@@ -54,6 +54,7 @@ public interface ChatroomRepository extends JpaRepository<ChatroomEntity, Long>{
 			  on u.user_id = cu2.user_id
 			where cu.user_id = :userId
 			  and cu.connection_status != 'DL'
+			  and u.deleted_at is null
 			""", nativeQuery = true)
 	List<ChatroomListProjection> findChatroomsByUserId(@Param("userId") long userId);
 	
@@ -81,17 +82,22 @@ public interface ChatroomRepository extends JpaRepository<ChatroomEntity, Long>{
 		    join chatrooms c
 		        on c.chatroom_id = cu_me.chatroom_id
 		    left join (
-		        select m.chatroom_id, m.user_id
-		        from messages m
-		        where (m.chatroom_id, m.send_date) in (
-		            select chatroom_id, max(send_date)
-		            from messages
-		            group by chatroom_id
+		        select chatroom_id, user_id
+		        from (
+		            select m.chatroom_id,
+		                   m.user_id,
+		                   row_number() over (
+		                       partition by m.chatroom_id
+		                       order by m.send_date desc, m.message_id desc
+		                   ) rn
+		            from messages m
 		        )
+		        where rn = 1
 		    ) lm
 		        on lm.chatroom_id = cu_me.chatroom_id
 		    where cu_me.user_id = :userId
 		      and cu_me.connection_status != 'DL'
+		      and u.deleted_at is null
 		      and u.name like '%' || :keyword || '%'
 			""", nativeQuery = true)
 	List<ChatroomListProjection> findChatroomUsersBySearchInput(@Param("keyword") String keyword,

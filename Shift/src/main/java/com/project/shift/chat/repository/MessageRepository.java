@@ -17,12 +17,12 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>{
 	// 특정 사용자가 읽지 않은 특정 채팅방의 메시지 개수 반환
 	@Query(value = """
 			select count(*)
-			from messages m, chatroom_users cu
-			where cu.user_id = :userId and
-				  cu.chatroom_id = :chatroomId and
-				  m.chatroom_id = cu.chatroom_id and
-				  m.send_date >= GREATEST(cu.last_connection_time, cu.created_time) and
-				  m.user_id <> :userId
+			from chatroom_users cu
+			join messages m on m.chatroom_id = cu.chatroom_id
+			where cu.user_id = :userId
+			  and cu.chatroom_id = :chatroomId
+			  and m.send_date >= greatest(cu.last_connection_time, cu.created_time)
+			  and m.user_id <> :userId
 			""", nativeQuery = true)
 	int countUnreadMessages(@Param("chatroomId") long chatroomId, @Param("userId") long userId);
 

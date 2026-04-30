@@ -21,9 +21,9 @@ public interface FriendRepository extends JpaRepository<FriendEntity, Long>{
 				u.name,
 				u.login_id as loginId,
 				u.phone
-			from friends f, users u
-			where f.friend_id = u.user_id
-				and f.user_id = :userId
+			from friends f
+			join users u on u.user_id = f.friend_id
+			where f.user_id = :userId
 				and u.deleted_at is null
 			""", nativeQuery = true)
 	List<FriendInfoDTO> getFriendsList(@Param("userId") long userId);
