@@ -8,8 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.shift.chat.dto.request.FriendDTO;
 import com.project.shift.chat.dto.response.FriendInfoDTO;
 import com.project.shift.chat.entity.FriendEntity;
+import com.project.shift.chat.repository.ChatUserRepository;
 import com.project.shift.chat.repository.FriendRepository;
 import com.project.shift.global.exception.detail.user.UserNotFoundException;
+import com.project.shift.user.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class FriendService {
 
 	private final FriendRepository friendRepository;
+	private final ChatUserRepository chatUserRepository;
 	
 	@Transactional(readOnly = true)
 	public List<FriendInfoDTO> getUserFriends(long userId) {
@@ -26,7 +29,9 @@ public class FriendService {
 	
 	@Transactional
 	public void addFriendship(FriendDTO dto) {
-        friendRepository.save(FriendEntity.toEntity(dto));
+		UserEntity user = chatUserRepository.getReferenceById(dto.getUserId());
+        UserEntity friend = chatUserRepository.getReferenceById(dto.getFriendId());
+        friendRepository.save(FriendEntity.from(dto, user, friend));
     }
 	
 	@Transactional

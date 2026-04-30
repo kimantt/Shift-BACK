@@ -60,7 +60,7 @@ public class ChatUserService {
         }
 
         // 검색된 사용자와의 친구여부 포함하여 반환
-        boolean ifFriend = friendRepository.existsByUserIdAndFriendId(userId, entity.getUserId());
+        boolean ifFriend = friendRepository.existsByUser_UserIdAndFriend_UserId(userId, entity.getUserId());
 
         return ChatUserSearchResultDTO.builder()
                 .ifFriend(ifFriend)

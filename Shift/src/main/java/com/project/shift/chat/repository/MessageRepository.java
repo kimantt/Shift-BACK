@@ -29,7 +29,7 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>{
 	// 채팅방 최초 생성 시간 이후의 메시지 반환
 	@Query("""
 			SELECT m FROM MessageEntity m
-			WHERE m.chatroomId = :chatroomId AND
+			WHERE m.chatroom.chatroomId = :chatroomId AND
 				  m.sendDate >= :createdDateTime
 			""")
 	List<MessageEntity> findByChatroomId(@Param("chatroomId") long chatroomId,
@@ -41,10 +41,10 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>{
 	@Query("""
 			UPDATE MessageEntity m
 			SET m.unreadCount = m.unreadCount-1
-			WHERE m.chatroomId = :chatroomId AND
+			WHERE m.chatroom.chatroomId = :chatroomId AND
 				  m.unreadCount > 0 AND
 				  m.sendDate >= :lastConnectionTime AND
-				  m.userId <> :userId
+				  m.user.userId <> :userId
 			""")
 	void markMessagesAsRead(@Param("chatroomId") long chatroomId, @Param("lastConnectionTime") Date lastConnectionTime, @Param("userId") long userId);
 	

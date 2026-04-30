@@ -21,8 +21,8 @@ public class FriendDTO {
     public static FriendDTO toDto(FriendEntity entity) {
         return FriendDTO.builder()
                 .friendshipId(entity.getFriendshipId())
-                .userId(entity.getUserId())
-                .friendId(entity.getFriendId())
+                .userId(entity.getUser().getUserId())
+                .friendId(entity.getFriend().getUserId())
                 .build();
     }
 }

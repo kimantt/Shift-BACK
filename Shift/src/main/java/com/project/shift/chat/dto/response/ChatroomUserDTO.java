@@ -35,8 +35,8 @@ public class ChatroomUserDTO {
     public static ChatroomUserDTO toDto(ChatroomUserEntity entity) {
         return ChatroomUserDTO.builder()
         		.chatroomUserId(entity.getChatroomUserId())
-                .chatroomId(entity.getChatroomId())
-                .userId(entity.getUserId())
+        		.chatroomId(entity.getChatroom().getChatroomId())
+                .userId(entity.getUser().getUserId())
                 .chatroomName(entity.getChatroomName())
                 .lastConnectionTime(entity.getLastConnectionTime())
                 .createdTime(entity.getCreatedTime())

@@ -16,6 +16,7 @@ import com.project.shift.chat.dto.response.ChatroomDTO;
 import com.project.shift.chat.dto.response.ChatroomListDTO;
 import com.project.shift.chat.dto.response.ChatroomUserDTO;
 import com.project.shift.chat.dto.response.MessageDTO;
+import com.project.shift.chat.entity.ChatroomEntity;
 import com.project.shift.chat.entity.MessageEntity;
 import com.project.shift.chat.repository.ChatUserRepository;
 import com.project.shift.chat.repository.ChatroomRepository;
@@ -41,7 +42,7 @@ public class MessageService {
 	// 메시지 DB 저장
 	@Transactional
 	public void addMessage(MessageDTO message) {
-		messageRepository.save(MessageEntity.toEntity(message));
+		messageRepository.save(buildMessageEntity(message));
 	}
 	
 	// 채팅방 최초 접속 시간 이후 모든 채팅방 메시지 반환
@@ -109,7 +110,7 @@ public class MessageService {
 				// 현재 채팅방에 온라인 상태인 유저의 수를 구해서 메시지의 unreadCount를 세팅
 				setUnreadCount(messageDTO, chatroomUserDTO);
 	        	// 메시지를 DB에 저장
-	        	messageRepository.save(MessageEntity.toEntity(messageDTO));
+				messageRepository.save(buildMessageEntity(messageDTO));
 	        	// 채팅방의 마지막 메시지와 시간을 업데이트
 	        	updateChatroomInfo(messageDTO, chatroomUserDTO);
 	        	// 받는 사람들에게 메시지가 왔다고 브로드캐스팅 (채팅방 목록 실시간 갱신용)
@@ -121,6 +122,12 @@ public class MessageService {
 		
 		// 메시지 브로드캐스팅 로직 호출
 		broadcastToChatroom(messageDTO);
+	}
+	
+	private MessageEntity buildMessageEntity(MessageDTO messageDTO) {
+		ChatroomEntity chatroom = chatroomRepository.getReferenceById(messageDTO.getChatroomId());
+	        UserEntity sender = chatUserRepository.getReferenceById(messageDTO.getUserId());
+		return MessageEntity.from(messageDTO, chatroom, sender);
 	}
 	
 	// 채팅방의 마지막 메시지와 시간을 업데이트

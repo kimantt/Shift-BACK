@@ -42,8 +42,8 @@ public class MessageDTO {
     public static MessageDTO toDto(MessageEntity entity) {
         return MessageDTO.builder()
                 .messageId(entity.getMessageId())
-                .chatroomId(entity.getChatroomId())
-                .userId(entity.getUserId())
+                .chatroomId(entity.getChatroom().getChatroomId())
+                .userId(entity.getUser().getUserId())
                 .sendDate(entity.getSendDate())
                 .content(entity.getContent())
                 .isGift(entity.getIsGift())

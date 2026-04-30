@@ -13,10 +13,14 @@ import com.project.shift.chat.dto.request.MessageWithSenderDTO;
 import com.project.shift.chat.dto.response.ChatroomListDTO;
 import com.project.shift.chat.dto.response.ChatroomUserDTO;
 import com.project.shift.chat.dto.response.projection.ChatroomListProjection;
+import com.project.shift.chat.entity.ChatroomEntity;
 import com.project.shift.chat.entity.ChatroomUserEntity;
+import com.project.shift.chat.repository.ChatUserRepository;
+import com.project.shift.chat.repository.ChatroomRepository;
 import com.project.shift.chat.repository.ChatroomUserRepository;
 import com.project.shift.chat.repository.MessageRepository;
 import com.project.shift.global.exception.detail.user.UserNotFoundException;
+import com.project.shift.user.entity.UserEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +30,8 @@ public class ChatroomUserService {
 
 	private final ChatroomUserRepository chatroomUserRepository;
 	private final MessageRepository messageRepository;
+	private final ChatroomRepository chatroomRepository;
+	private final ChatUserRepository chatUserRepository;
 	
 	// 특정 채팅방에 참여
 	@Transactional
@@ -34,7 +40,9 @@ public class ChatroomUserService {
 		ChatroomUserDTO sender = dto.getSender();
         sender.setChatroomId(chatroomId);
         sender.setConnectionStatus("ON");
-        chatroomUserRepository.save(ChatroomUserEntity.toEntity(sender));
+        ChatroomEntity chatroom = chatroomRepository.getReferenceById(chatroomId);
+        UserEntity senderUser = chatUserRepository.getReferenceById(sender.getUserId());
+        chatroomUserRepository.save(ChatroomUserEntity.from(sender, chatroom, senderUser));
 		
 		// 채팅 수신자 생성 후 저장
         ChatroomUserDTO receiver = ChatroomUserDTO.builder()
@@ -46,7 +54,8 @@ public class ChatroomUserService {
                 .createdTime(dto.getMessage().getSendDate())
                 .lastConnectionTime(new Date(dto.getMessage().getSendDate().getTime() - 1000L))
                 .build();
-        chatroomUserRepository.save(ChatroomUserEntity.toEntity(receiver));
+        UserEntity receiverUser = chatUserRepository.getReferenceById(receiver.getUserId());
+        chatroomUserRepository.save(ChatroomUserEntity.from(receiver, chatroom, receiverUser));
 	}
 	
 	// 특정 채팅방에서 특정 사용자만 나가기 (사용자 key 보존, 상대방 데이터 보존)
@@ -61,7 +70,7 @@ public class ChatroomUserService {
 	// 특정 채팅방에 참여한 모든 사용자 나가기 (생성된 key만 보존)
 	@Transactional
 	public void deleteAllChatroomUsers(long chatroomId) {
-        if (!chatroomUserRepository.existsByChatroomId(chatroomId)) {
+		if (!chatroomUserRepository.existsByChatroom_ChatroomId(chatroomId)) {
             throw new UserNotFoundException("채팅방 참여 정보를 찾을 수 없습니다.");
         }
         chatroomUserRepository.initAllChatroomUsersExceptKey(chatroomId);

@@ -69,7 +69,10 @@ public class ChatroomService {
 		newChatroom.setLastMsgContent(dto.getMessage().getContent());
 				
 		// 저장 후 DB에서 생성된 PK 가져오기
-		ChatroomEntity savedEntity = chatroomRepository.save(ChatroomEntity.toEntity(newChatroom));
+		ChatroomEntity savedEntity = chatroomRepository.save(ChatroomEntity.builder()
+				.lastMsgContent(newChatroom.getLastMsgContent())
+				.lastMsgDate(newChatroom.getLastMsgDate())
+				.build());
 	    return savedEntity.getChatroomId();
 	}
 	
