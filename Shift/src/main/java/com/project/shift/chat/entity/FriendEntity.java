@@ -1,15 +1,18 @@
 package com.project.shift.chat.entity;
 
 import com.project.shift.chat.dto.request.FriendDTO;
+import com.project.shift.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +22,6 @@ import lombok.Setter;
 @Table(name = "FRIENDS")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class FriendEntity {
 
     @Id
@@ -37,19 +38,27 @@ public class FriendEntity {
     private long friendshipId;
 
     @Setter
-    @Column(name = "USER_ID")
-    private long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID")
+    private UserEntity user;
 
     @Setter
-    @Column(name = "FRIEND_ID")
-    private long friendId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "FRIEND_ID")
+    private UserEntity friend;
 
-    // DTO → Entity 변환
-    public static FriendEntity toEntity(FriendDTO dto) {
+    @Builder
+    public FriendEntity(long friendshipId, UserEntity user, UserEntity friend) {
+        this.friendshipId = friendshipId;
+        this.user = user;
+        this.friend = friend;
+    }
+    
+    public static FriendEntity from(FriendDTO dto, UserEntity user, UserEntity friend) {
         return FriendEntity.builder()
                 .friendshipId(dto.getFriendshipId())
-                .userId(dto.getUserId())
-                .friendId(dto.getFriendId())
+                .user(user)
+                .friend(friend)
                 .build();
     }
 }

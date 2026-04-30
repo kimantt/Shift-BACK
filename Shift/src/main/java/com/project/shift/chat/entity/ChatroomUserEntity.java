@@ -5,15 +5,18 @@ import java.util.Date;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.project.shift.chat.dto.response.ChatroomUserDTO;
+import com.project.shift.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +25,6 @@ import lombok.NoArgsConstructor;
 @Table(name="CHATROOM_USERS")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ChatroomUserEntity {
 
     @Id
@@ -39,11 +40,13 @@ public class ChatroomUserEntity {
     @Column(name = "CHATROOM_USERS_ID", nullable = false)
     private long chatroomUserId;
     
-    @Column(name = "CHATROOM_ID", nullable = false)
-    private long chatroomId;
-    
-    @Column(name = "USER_ID")
-    private long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CHATROOM_ID", nullable = false)
+    private ChatroomEntity chatroom;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID")
+    private UserEntity user;
 
     @Column(name = "CHATROOM_NAME", length = 30)
     private String chatroomName;
@@ -62,11 +65,23 @@ public class ChatroomUserEntity {
     @Column(name = "IS_DARK_MODE", nullable = false, length = 1, columnDefinition = "CHAR(1) default 'N'")
     private String isDarkMode;
     
-    // DTO -> Entity 변환
-    public static ChatroomUserEntity toEntity(ChatroomUserDTO dto) {
+    @Builder
+    public ChatroomUserEntity(long chatroomUserId, ChatroomEntity chatroom, UserEntity user, String chatroomName,
+            Date lastConnectionTime, Date createdTime, String connectionStatus, String isDarkMode) {
+        this.chatroomUserId = chatroomUserId;
+        this.chatroom = chatroom;
+        this.user = user;
+        this.chatroomName = chatroomName;
+        this.lastConnectionTime = lastConnectionTime;
+        this.createdTime = createdTime;
+        this.connectionStatus = connectionStatus;
+        this.isDarkMode = isDarkMode;
+    }
+    
+    public static ChatroomUserEntity from(ChatroomUserDTO dto, ChatroomEntity chatroom, UserEntity user) {
         return ChatroomUserEntity.builder()
-                .chatroomId(dto.getChatroomId())
-                .userId(dto.getUserId())
+                .chatroom(chatroom)
+                .user(user)
                 .chatroomName(dto.getChatroomName())
                 .lastConnectionTime(dto.getLastConnectionTime())
                 .createdTime(dto.getCreatedTime())
@@ -74,5 +89,4 @@ public class ChatroomUserEntity {
                 .isDarkMode(dto.getIsDarkMode())
                 .build();
     }
-
 }

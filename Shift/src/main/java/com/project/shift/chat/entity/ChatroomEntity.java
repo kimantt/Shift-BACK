@@ -1,19 +1,20 @@
 package com.project.shift.chat.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.project.shift.chat.dto.response.ChatroomDTO;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +23,6 @@ import lombok.NoArgsConstructor;
 @Table(name="CHATROOMS")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class ChatroomEntity {
 
     @Id
@@ -46,12 +45,16 @@ public class ChatroomEntity {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date lastMsgDate;
 
-    // DTO -> Entity 변환
-    public static ChatroomEntity toEntity(ChatroomDTO dto) {
-        return ChatroomEntity.builder()
-                .lastMsgContent(dto.getLastMsgContent())
-                .lastMsgDate(dto.getLastMsgDate())
-                .build();
-    }
+    @OneToMany(mappedBy = "chatroom", fetch = FetchType.LAZY)
+    private List<ChatroomUserEntity> chatroomUsers = new ArrayList<>();
 
+    @OneToMany(mappedBy = "chatroom", fetch = FetchType.LAZY)
+    private List<MessageEntity> messages = new ArrayList<>();
+
+    @Builder
+    public ChatroomEntity(Long chatroomId, String lastMsgContent, Date lastMsgDate) {
+        this.chatroomId = chatroomId;
+        this.lastMsgContent = lastMsgContent;
+        this.lastMsgDate = lastMsgDate;
+    }
 }
