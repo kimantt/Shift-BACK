@@ -4,7 +4,6 @@ import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.project.shift.chat.dto.response.MessageDTO;
 import com.project.shift.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
@@ -73,15 +72,23 @@ public class MessageEntity {
         this.unreadCount = unreadCount;
     }
     
-    public static MessageEntity from(MessageDTO dto, ChatroomEntity chatroom, UserEntity user) {
+    public static MessageEntity of(
+            long messageId,
+            ChatroomEntity chatroom,
+            UserEntity user,
+            Date sendDate,
+            String content,
+            String isGift,
+            int unreadCount
+    ) {
         return MessageEntity.builder()
-                .messageId(dto.getMessageId())
+                .messageId(messageId)
                 .chatroom(chatroom)
                 .user(user)
-                .sendDate(dto.getSendDate())
-                .content(dto.getContent())
-                .isGift(dto.getIsGift())
-                .unreadCount(dto.getUnreadCount())
+                .sendDate(sendDate)
+                .content(content)
+                .isGift(isGift)
+                .unreadCount(unreadCount)
                 .build();
     }
 }

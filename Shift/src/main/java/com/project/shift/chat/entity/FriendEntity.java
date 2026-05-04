@@ -1,6 +1,5 @@
 package com.project.shift.chat.entity;
 
-import com.project.shift.chat.dto.request.FriendDTO;
 import com.project.shift.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
@@ -54,9 +53,9 @@ public class FriendEntity {
         this.friend = friend;
     }
     
-    public static FriendEntity from(FriendDTO dto, UserEntity user, UserEntity friend) {
+    public static FriendEntity of(long friendshipId, UserEntity user, UserEntity friend) {
         return FriendEntity.builder()
-                .friendshipId(dto.getFriendshipId())
+                .friendshipId(friendshipId)
                 .user(user)
                 .friend(friend)
                 .build();

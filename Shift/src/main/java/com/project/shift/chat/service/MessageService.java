@@ -127,7 +127,15 @@ public class MessageService {
 	private MessageEntity buildMessageEntity(MessageDTO messageDTO) {
 		ChatroomEntity chatroom = chatroomRepository.getReferenceById(messageDTO.getChatroomId());
 	        UserEntity sender = chatUserRepository.getReferenceById(messageDTO.getUserId());
-		return MessageEntity.from(messageDTO, chatroom, sender);
+	        return MessageEntity.of(
+					messageDTO.getMessageId(),
+					chatroom,
+					sender,
+					messageDTO.getSendDate(),
+					messageDTO.getContent(),
+					messageDTO.getIsGift(),
+					messageDTO.getUnreadCount()
+			);
 	}
 	
 	// 채팅방의 마지막 메시지와 시간을 업데이트

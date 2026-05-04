@@ -4,7 +4,6 @@ import java.util.Date;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.project.shift.chat.dto.response.ChatroomUserDTO;
 import com.project.shift.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
@@ -78,15 +77,23 @@ public class ChatroomUserEntity {
         this.isDarkMode = isDarkMode;
     }
     
-    public static ChatroomUserEntity from(ChatroomUserDTO dto, ChatroomEntity chatroom, UserEntity user) {
+    public static ChatroomUserEntity of(
+            ChatroomEntity chatroom,
+            UserEntity user,
+            String chatroomName,
+            Date lastConnectionTime,
+            Date createdTime,
+            String connectionStatus,
+            String isDarkMode
+    ) {
         return ChatroomUserEntity.builder()
                 .chatroom(chatroom)
                 .user(user)
-                .chatroomName(dto.getChatroomName())
-                .lastConnectionTime(dto.getLastConnectionTime())
-                .createdTime(dto.getCreatedTime())
-                .connectionStatus(dto.getConnectionStatus())
-                .isDarkMode(dto.getIsDarkMode())
+                .chatroomName(chatroomName)
+                .lastConnectionTime(lastConnectionTime)
+                .createdTime(createdTime)
+                .connectionStatus(connectionStatus)
+                .isDarkMode(isDarkMode)
                 .build();
     }
 }

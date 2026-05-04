@@ -42,7 +42,7 @@ public class FriendService {
         UserEntity friend = chatUserRepository.findById(dto.getFriendId())
                 .orElseThrow(() -> new UserNotFoundException("친구 사용자를 찾을 수 없습니다."));
         
-        friendRepository.save(FriendEntity.from(dto, user, friend));
+        friendRepository.save(FriendEntity.of(dto.getFriendshipId(), user, friend));
     }
 	
 	@Transactional

@@ -42,7 +42,15 @@ public class ChatroomUserService {
         sender.setConnectionStatus("ON");
         ChatroomEntity chatroom = chatroomRepository.getReferenceById(chatroomId);
         UserEntity senderUser = chatUserRepository.getReferenceById(sender.getUserId());
-        chatroomUserRepository.save(ChatroomUserEntity.from(sender, chatroom, senderUser));
+        chatroomUserRepository.save(ChatroomUserEntity.of(
+                chatroom,
+                senderUser,
+                sender.getChatroomName(),
+                sender.getLastConnectionTime(),
+                sender.getCreatedTime(),
+                sender.getConnectionStatus(),
+                sender.getIsDarkMode()
+        ));
 		
 		// 채팅 수신자 생성 후 저장
         ChatroomUserDTO receiver = ChatroomUserDTO.builder()
@@ -55,7 +63,15 @@ public class ChatroomUserService {
                 .lastConnectionTime(new Date(dto.getMessage().getSendDate().getTime() - 1000L))
                 .build();
         UserEntity receiverUser = chatUserRepository.getReferenceById(receiver.getUserId());
-        chatroomUserRepository.save(ChatroomUserEntity.from(receiver, chatroom, receiverUser));
+        chatroomUserRepository.save(ChatroomUserEntity.of(
+                chatroom,
+                receiverUser,
+                receiver.getChatroomName(),
+                receiver.getLastConnectionTime(),
+                receiver.getCreatedTime(),
+                receiver.getConnectionStatus(),
+                receiver.getIsDarkMode()
+        ));
 	}
 	
 	// 특정 채팅방에서 특정 사용자만 나가기 (사용자 key 보존, 상대방 데이터 보존)
