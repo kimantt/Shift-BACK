@@ -147,6 +147,7 @@ public interface ChatroomUserRepository extends JpaRepository<ChatroomUserEntity
 		    WHERE u.user.userId = :userId
 		      AND u.chatroom.chatroomId = :chatroomId
 		      AND r.user.userId <> :userId
+		      AND r.connectionStatus = 'ON'
 			""")
 	int countOtherUsersOnline(@Param("chatroomId") long chatroomId,
 	        				  @Param("userId") long userId);

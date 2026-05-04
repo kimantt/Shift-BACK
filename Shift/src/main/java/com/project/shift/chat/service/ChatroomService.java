@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ChatroomService {
+	
+	private static final int MAX_SEARCH_LENGTH = 100;
 
 	private final ChatroomRepository chatroomRepository;
 	private final MessageRepository messageRepository;
@@ -146,6 +148,9 @@ public class ChatroomService {
 	private void validateSearchInput(String input) {
         if (input == null || input.isBlank()) {
             throw new UserValidationException("검색어를 입력해 주세요.");
+        }
+        if (input.length() > MAX_SEARCH_LENGTH) {
+            throw new UserValidationException("검색어는 100자 이하여야 합니다.");
         }
     }
 

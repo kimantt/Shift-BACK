@@ -67,6 +67,7 @@ public class ChatroomController {
 	
 	// 특정 채팅방에 참여한 모든 사용자의 채팅방 삭제
 	// → 실제 데이터 삭제가 아닌 pk, fk 빼고 초기화
+	@DeleteMapping("/{chatroomId}")
 	public ResponseEntity<MessageResponseDTO> deleteChatroom(@PathVariable long chatroomId) {
         chatroomService.deleteChatroomAndChatroomUsers(chatroomId);
         return ResponseEntity.ok(new MessageResponseDTO("채팅방이 삭제되었습니다."));
