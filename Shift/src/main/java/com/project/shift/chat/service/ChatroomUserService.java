@@ -66,15 +66,6 @@ public class ChatroomUserService {
         }
         chatroomUserRepository.initChatroomUserExceptKey(chatroomUserId);
 	}
-	
-	// 특정 채팅방에 참여한 모든 사용자 나가기 (생성된 key만 보존)
-	@Transactional
-	public void deleteAllChatroomUsers(long chatroomId) {
-		if (!chatroomUserRepository.existsByChatroom_ChatroomId(chatroomId)) {
-            throw new UserNotFoundException("채팅방 참여 정보를 찾을 수 없습니다.");
-        }
-        chatroomUserRepository.initAllChatroomUsersExceptKey(chatroomId);
-    }
 
 	// 특정 채팅방 유저 정보 반환
 	@Transactional(readOnly = true)

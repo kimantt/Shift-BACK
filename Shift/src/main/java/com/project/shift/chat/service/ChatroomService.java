@@ -15,6 +15,7 @@ import com.project.shift.chat.dto.response.projection.ChatroomListProjection;
 import com.project.shift.chat.dto.response.projection.MessageSearchResultProjection;
 import com.project.shift.chat.entity.ChatroomEntity;
 import com.project.shift.chat.repository.ChatroomRepository;
+import com.project.shift.chat.repository.ChatroomUserRepository;
 import com.project.shift.chat.repository.MessageRepository;
 import com.project.shift.global.exception.detail.user.UserNotFoundException;
 import com.project.shift.global.exception.detail.user.UserValidationException;
@@ -29,7 +30,7 @@ public class ChatroomService {
 
 	private final ChatroomRepository chatroomRepository;
 	private final MessageRepository messageRepository;
-	private final ChatroomUserService chatroomUserService;
+	private final ChatroomUserRepository chatroomUserRepository;
 	
 	// 특정 채팅방 정보 반환
 	@Transactional(readOnly = true)
@@ -87,8 +88,15 @@ public class ChatroomService {
         }
 
         chatroomRepository.initChatroomExceptKey(chatroomId);
-        chatroomUserService.deleteAllChatroomUsers(chatroomId);
+        deleteAllChatroomUsers(chatroomId);
     }
+	
+	private void deleteAllChatroomUsers(long chatroomId) {
+		if (!chatroomUserRepository.existsByChatroom_ChatroomId(chatroomId)) {
+			throw new UserNotFoundException("채팅방 참여 정보를 찾을 수 없습니다.");
+		}
+		chatroomUserRepository.initAllChatroomUsersExceptKey(chatroomId);
+	}
 	
 	// 채팅방 생성 시간, 메시지 전송 시간, 채팅방에 전송된 최신 메시지 전송 시간 동일하게 세팅
 	private void setTimestamps(MessageWithSenderDTO payload, ChatroomDTO chatroomDTO) {
