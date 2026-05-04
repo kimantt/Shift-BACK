@@ -1,5 +1,7 @@
 package com.project.shift.chat.controller;
 
+import static com.project.shift.global.security.CurrentUser.getUserIdOrNull;
+
 import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,9 +27,9 @@ public class FriendController {
 	private final FriendService friendService;
 	
 	// 친구 목록 조회
-	@GetMapping("/users/{userId}")
-	public List<FriendInfoDTO> getFriendList(@PathVariable long userId) {
-        return friendService.getUserFriends(userId);
+	@GetMapping()
+	public List<FriendInfoDTO> getFriendList() {
+        return friendService.getUserFriends(getUserIdOrNull());
     }
 	
 	// 친구 추가
